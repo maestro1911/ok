@@ -1,203 +1,313 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Sugam Dhungana</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sugam Dhungana</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --left-blue: #0b4aa0;      /* deep blue */
-    --left-blue-2:#07377a;
-    --muted:#6b7280;
-    --mint:#3ecaa0;
-    --panel-radius:14px;
-    --max-width:1200px;
-  }
-  *{box-sizing:border-box}
-  body,html{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;background:#f3f6fb;color:#102026}
-  .stage{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:28px;
-  }
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --left-blue: #0b4aa0;
+      /* deep blue */
+      --left-blue-2: #07377a;
+      --muted: #6b7280;
+      --mint: #3ecaa0;
+      --panel-radius: 14px;
+      --max-width: 1200px;
+    }
 
-  /* main card sized like the screenshot */
-  .card{
-    width:100%;
-    max-width:var(--max-width);
-    height:86vh;
-    border-radius:var(--panel-radius);
-    overflow:hidden;
-    display:grid;
-    grid-template-columns: 56% 44%;
-    box-shadow: 0 18px 50px rgba(15,30,50,0.12);
-    background: #fff;
-  }
+    * {
+      box-sizing: border-box
+    }
 
-  /* LEFT PANEL */
-  .left{
-    position:relative;
-    background: linear-gradient(180deg, var(--left-blue) 0%, var(--left-blue-2) 100%);
-    color: #fff;
-    padding:44px 56px;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-  }
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: #f3f6fb;
+      color: #102026
+    }
 
-  /* three vertical dots near left center */
-  .left .edge-dots{
-    position:absolute;
-    left:12px;
-    top:50%;
-    transform:translateY(-50%);
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-  }
-  .left .edge-dots span{
-    width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.92);
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-  }
+    .stage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
 
-  /* Big headline and sub */
-  .left .headline{
-    max-width:520px;
-  }
-  .left h1{
-    margin:0 0 14px 0;
-    font-size:34px;
-    line-height:1.02;
-    font-weight:800;
-    letter-spacing:-0.02em;
-  }
-  .left p.lead{
-    margin:0 0 20px 0;
-    font-weight:500;
-    opacity:0.98;
-    font-size:15px;
-    max-width:480px;
-  }
+    /* main card sized like the screenshot */
+    .card {
+      width: 100%;
+      max-width: var(--max-width);
+      height: 86vh;
+      border-radius: var(--panel-radius);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 56% 44%;
+      box-shadow: 0 18px 50px rgba(15, 30, 50, 0.12);
+      background: #fff;
+    }
 
-  /* portrait block at lower-left with veil overlay */
-  .portrait-wrap{
-    position:relative;
-    width:420px;
-    max-width:52%;
-    min-height:380px;
-    display:block;
-    border-radius:10px;
-    overflow:hidden;
-    margin-top:10px;
-    box-shadow: 0 10px 30px rgba(3,18,40,0.25);
-  }
-  .portrait{
-    display:block;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    transform: translateY(-6%);
-    filter: contrast(.95) saturate(.9) brightness(.95);
-  }
+    /* LEFT PANEL */
+    .left {
+      position: relative;
+      background: linear-gradient(180deg, var(--left-blue) 0%, var(--left-blue-2) 100%);
+      color: #fff;
+      padding: 44px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-  /* purple veil tint */
-  .portrait::after{content:"";display:block;position:absolute;inset:0;pointer-events:none}
-  .veil {
-    position:absolute; inset:0;
-    background: linear-gradient(120deg, rgba(120,30,160,0.12), rgba(40,10,120,0.14));
-    mix-blend-mode: multiply;
-    pointer-events:none;
-  }
+    /* three vertical dots near left center */
+    .left .edge-dots {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-  /* mesh/net overlay using diagonal fine pattern (no external image) */
-  .mesh {
-    position:absolute; inset:0;
-    pointer-events:none;
-    opacity:0.65;
-    mix-blend-mode: overlay;
-    background-image:
-      repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 6px),
-      repeating-linear-gradient(-45deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 6px);
-    transform:translateY(-8px);
-    background-size: 8px 8px;
-  }
+    .left .edge-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
 
-  /* quote area beneath the portrait */
-  .quote{
-    color:rgba(255,255,255,0.95);
-    max-width:420px;
-    font-size:13px;
-    margin-top:14px;
-    line-height:1.38;
-  }
-  .author{margin-top:10px;font-weight:700;font-size:13px;color:rgba(255,255,255,0.95)}
+    /* Big headline and sub */
+    .left .headline {
+      max-width: 520px;
+    }
 
-  /* RIGHT PANEL */
-  .right{
-    padding:48px 48px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:white;
-  }
-  .right-inner{
-    width:100%;
-    max-width:380px;
-  }
+    .left h1 {
+      margin: 0 0 14px 0;
+      font-size: 34px;
+      line-height: 1.02;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
 
-  /* small square logo + welcome */
-  .brand{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    margin-bottom:22px;
-  }
-  .brand .logo{
-    width:50px;height:50px;border-radius:10px;display:grid;place-items:center;
-    background: linear-gradient(180deg,#ddf8ee,#b6f0d6);
-    color:#07594b;font-weight:800;font-size:20px;
-    box-shadow: 0 6px 18px rgba(14,96,74,0.08);
-  }
-  .brand .title{font-weight:700;font-size:16px;color:#0b2230}
-  .welcome{
-    font-size:28px;margin:6px 0 6px 0;font-weight:800;color:#0b2230;
-  }
-  .subtitle{color:var(--muted);font-size:14px;margin-bottom:18px}
+    .left p.lead {
+      margin: 0 0 20px 0;
+      font-weight: 500;
+      opacity: 0.98;
+      font-size: 15px;
+      max-width: 480px;
+    }
 
-  /* login controls */
-  .controls{display:flex;flex-direction:column;gap:14px;margin-top:8px}
-  .control-btn{
-    display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid #e9f0f7;background:#fbfeff;font-weight:700;cursor:pointer;
-    box-shadow: 0 6px 20px rgba(8,20,40,0.04);
-  }
-  .control-btn svg{opacity:0.8}
+    /* portrait block at lower-left with veil overlay */
+    .portrait-wrap {
+      position: relative;
+      width: 420px;
+      max-width: 52%;
+      min-height: 380px;
+      display: block;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(3, 18, 40, 0.25);
+    }
 
-  /* small thin input & big CTA */
-  .thin-input{
-    display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid #e6eef6;background:#f7fbfd;
-    color:#123; font-weight:600;
-  }
-  .cta{
-    margin-top:6px;padding:12px 14px;border-radius:10px;background:linear-gradient(180deg,var(--mint), #2db88c);color:#fff;font-weight:800;border:0;cursor:pointer;
-    box-shadow: 0 10px 26px rgba(62,202,160,0.18);
-  }
+    .portrait {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateY(-6%);
+      filter: contrast(.95) saturate(.9) brightness(.95);
+    }
 
-  /* little muted footer area */
-  .small{font-size:12px;color:#9aa3ad;margin-top:16px}
+    /* purple veil tint */
+    .portrait::after {
+      content: "";
+      display: block;
+      position: absolute;
+      inset: 0;
+      pointer-events: none
+    }
 
-  /* responsive */
-  @media (max-width:980px){
-    .card{grid-template-columns: 1fr; height:auto; border-radius:12px;}
-    .left{padding:28px;}
-    .right{padding:28px}
-    .portrait-wrap{max-width:100%; width:100%; min-height:280px}
-  }
-</style>
+    .veil {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(120, 30, 160, 0.12), rgba(40, 10, 120, 0.14));
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    /* mesh/net overlay using diagonal fine pattern (no external image) */
+    .mesh {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.65;
+      mix-blend-mode: overlay;
+      background-image:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 1px, transparent 1px, transparent 6px),
+        repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 1px, transparent 1px, transparent 6px);
+      transform: translateY(-8px);
+      background-size: 8px 8px;
+    }
+
+    /* quote area beneath the portrait */
+    .quote {
+      color: rgba(255, 255, 255, 0.95);
+      max-width: 420px;
+      font-size: 13px;
+      margin-top: 14px;
+      line-height: 1.38;
+    }
+
+    .author {
+      margin-top: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.95)
+    }
+
+    /* RIGHT PANEL */
+    .right {
+      padding: 48px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+    }
+
+    .right-inner {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    /* small square logo + welcome */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .brand .logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #ddf8ee, #b6f0d6);
+      color: #07594b;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 6px 18px rgba(14, 96, 74, 0.08);
+    }
+
+    .brand .title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #0b2230
+    }
+
+    .welcome {
+      font-size: 28px;
+      margin: 6px 0 6px 0;
+      font-weight: 800;
+      color: #0b2230;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 18px
+    }
+
+    /* login controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px
+    }
+
+    .control-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e9f0f7;
+      background: #fbfeff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(8, 20, 40, 0.04);
+    }
+
+    .control-btn svg {
+      opacity: 0.8
+    }
+
+    /* small thin input & big CTA */
+    .thin-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e6eef6;
+      background: #f7fbfd;
+      color: #123;
+      font-weight: 600;
+    }
+
+    .cta {
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, var(--mint), #2db88c);
+      color: #fff;
+      font-weight: 800;
+      border: 0;
+      cursor: pointer;
+      box-shadow: 0 10px 26px rgba(62, 202, 160, 0.18);
+    }
+
+    /* little muted footer area */
+    .small {
+      font-size: 12px;
+      color: #9aa3ad;
+      margin-top: 16px
+    }
+
+    /* responsive */
+    @media (max-width:980px) {
+      .card {
+        grid-template-columns: 1fr;
+        height: auto;
+        border-radius: 12px;
+      }
+
+      .left {
+        padding: 28px;
+      }
+
+      .right {
+        padding: 28px
+      }
+
+      .portrait-wrap {
+        max-width: 100%;
+        width: 100%;
+        min-height: 280px
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="stage">
     <div class="card" role="main" aria-label="Replica split landing">
@@ -208,12 +318,12 @@
         </div>
         <div class="headline" id="left-title">
           <h1>WELCOME TO MY WEBSITE</h1>
-<h2>
-  <pre style="text-align: left; margin-left: 10px; overflow-wrap: break-word;">
+          <h2>
+            <pre style="text-align: left; margin-left: 10px; overflow-wrap: break-word;">
 When you don't know anyone,
-<b style="color: red;">YOU CAN BE ANYONE.</b>
+         <b style="color: red;">YOU CAN BE ANYONE.</b>
   </pre>
-</h2>
+          </h2>
 
         </div>
 
@@ -227,7 +337,7 @@ When you don't know anyone,
 
           <div style="max-width:420px;">
             <pre class="quote"> <b>विद्या ददाति विनयं, विनयाद् याति पात्रताम्।</b></pre>
-            
+
           </div>
         </div>
       </section>
@@ -250,14 +360,17 @@ When you don't know anyone,
             <div class="control-btn" role="button" tabindex="0">
               <!-- fake facebook icon -->
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M15.12 3H12.9C10.96 3 10.1 3.85 10.1 5.66V7.5H8v3.04h2.1V21h3.02v-10.46h1.9l.3-3.04h-2.2V5.24c0-.88.22-1.46 1.3-1.46h.88V3z" fill="#3b5998" />
+                <path
+                  d="M15.12 3H12.9C10.96 3 10.1 3.85 10.1 5.66V7.5H8v3.04h2.1V21h3.02v-10.46h1.9l.3-3.04h-2.2V5.24c0-.88.22-1.46 1.3-1.46h.88V3z"
+                  fill="#3b5998" />
               </svg>
               Continue with Facebook
             </div>
 
             <div class="control-btn" role="button" tabindex="0">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M20 7H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z" stroke="#6b7280" stroke-width="1.2" fill="none"/>
+                <path d="M20 7H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z" stroke="#6b7280"
+                  stroke-width="1.2" fill="none" />
                 <path d="M4 7h16" stroke="#e6eef6" stroke-width="1.2" />
               </svg>
               Join with email
@@ -265,7 +378,7 @@ When you don't know anyone,
 
             <div class="thin-input" role="group" aria-label="email input">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3 8.5l9 6 9-6" stroke="#6b7280" stroke-width="1.2" fill="none"/>
+                <path d="M3 8.5l9 6 9-6" stroke="#6b7280" stroke-width="1.2" fill="none" />
               </svg>
               <span style="opacity:0.8">Enter your email</span>
             </div>
@@ -279,4 +392,5 @@ When you don't know anyone,
     </div>
   </div>
 </body>
+
 </html>
