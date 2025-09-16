@@ -125,46 +125,12 @@
       filter: contrast(.95) saturate(.9) brightness(.95);
     }
 
-    /* purple veil tint */
-    .portrait::after {
-      content: "";
-      display: block;
-      position: absolute;
-      inset: 0;
-      pointer-events: none
-    }
-
-    .veil {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, rgba(120, 30, 160, 0.12), rgba(40, 10, 120, 0.14));
-      mix-blend-mode: multiply;
-      pointer-events: none;
-    }
-
+    
+    
     /* mesh/net overlay using diagonal fine pattern (no external image) */
-    .mesh {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.65;
-      mix-blend-mode: overlay;
-      background-image:
-        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 1px, transparent 1px, transparent 6px),
-        repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.06) 0px, rgba(255, 255, 255, 0.06) 1px, transparent 1px, transparent 6px);
-      transform: translateY(-8px);
-      background-size: 8px 8px;
-    }
 
     /* quote area beneath the portrait */
-    .quote {
-      color: rgba(255, 255, 255, 0.95);
-      max-width: 420px;
-      font-size: 13px;
-      margin-top: 14px;
-      line-height: 1.38;
-    }
-
+    
     .author {
       margin-top: 10px;
       font-weight: 700;
