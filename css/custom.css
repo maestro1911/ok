@@ -76,15 +76,13 @@ body {
     margin-top: 6rem;
     font-size: 3.5rem;
     font-weight: bold;
-    color: #333;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    color: #030303;
     z-index: 1; /* Ensure text is above background */
 }
 
 #tagline {
     font-size: 1.5rem;
     margin-top: -1rem;
-    color: #151414;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    color: #000000;
     z-index: 1; /* Ensure text is above background */
 }
