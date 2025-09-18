@@ -15,9 +15,38 @@ body {
         color: #000000;       
 }
 
-.container-fluid {
-    background-color: #a7c6e4;
+.container-fluid{
+    position: absolute;
+    top: 0px;
+     height: 85.5px;
+    background-color: #d6cfcf;
 
+}
+
+.floating-photo {
+    position: absolute;
+    top: 85px;  /* space for header */
+    left: 0;
+    width: 100%;
+    height: 91.5%; /* covers the content area, not full screen */
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+
+    /* Subtle visibility so content stands out */
+    opacity: 0.28;  /* faint but visible */
+    filter: blur(0.5px) brightness(0.9);
+
+    /* Bottom fade to make text overlay safe */
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: cover;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+    mask-repeat: no-repeat;
+    mask-size: cover;
+
+    /* Subtle floating animation */
+    animation: floatBackground 20s ease-in-out infinite alternate;
 }
 
 
@@ -26,20 +55,30 @@ body {
 
 
 
+.container{
+    position: relative;
+    z-index: 1; /* Ensure content is above background */
+    text-align: center;
+    padding: 2rem;
+    margin-top: 2rem;
+
+}
 
 
 
-  
-    .floating-photo {
-        position: absolute;
-        top: 76.5px;
-        left: 0;
-        width: 100%;
-        height: 200%;
-        object-fit: cover;
-        opacity: 0.1;
-        transform: rotate(360deg) scale(1.0);
-        z-index: 0;
-        pointer-events: none;
-    }
-  
+#name {
+    margin-top: 3rem;
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    z-index: 1; /* Ensure text is above background */
+}
+
+#tagline {
+    font-size: 1.5rem;
+    margin-top: 3rem;
+    color: #151414;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    z-index: 1; /* Ensure text is above background */
+}
