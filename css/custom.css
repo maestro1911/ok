@@ -18,7 +18,7 @@ body {
 .container-fluid{
     position: absolute;
     top: 0px;
-     height: 85.5px;
+     height: 85px;
     background-color: #d6cfcf;
 
 }
@@ -48,6 +48,15 @@ body {
     /* Subtle floating animation */
     animation: floatBackground 20s ease-in-out infinite alternate;
 }
+/*yo chai tyo navigation ko boarder ko animation ho
+ floating photo le garako*/
+@keyframes floatBackground {
+    0% { transform: scale(1) translateY(0px); }
+    50% { transform: scale(1.005) translateY(-3px); } /* very subtle */
+    100% { transform: scale(1) translateY(0px); }
+}
+
+
 
 
 
@@ -56,18 +65,15 @@ body {
 
 
 .container{
+     text-align: center;
     position: relative;
     z-index: 1; /* Ensure content is above background */
-    text-align: center;
     padding: 2rem;
     margin-top: 2rem;
 
 }
-
-
-
 #name {
-    margin-top: 3rem;
+    margin-top: 6rem;
     font-size: 3.5rem;
     font-weight: bold;
     color: #333;
@@ -77,7 +83,7 @@ body {
 
 #tagline {
     font-size: 1.5rem;
-    margin-top: 3rem;
+    margin-top: -1rem;
     color: #151414;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     z-index: 1; /* Ensure text is above background */
