@@ -115,6 +115,44 @@ margin-right: auto;
 height: 20rem;
 }
 
+/* portfolio */
+#portfolio {
+    width: 100%;
+    height: auto;
+    padding: 4rem 0;
 
+}
+#portfolio img{
+    margin-top: 30px;
+    width: 100%;
+    
+}
+#portfolio .grid{
+   position: relative;
+   width: 100%;
+   
+}
+#portfolio .grid .overlay {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #527cec;
+
+}
+#portfolio .grid:hover .overlay {
+    opacity: 1;
+}
+ .text {
+    color: white;
+    font-size: 1.7rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+} 
 
 
