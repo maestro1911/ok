@@ -132,6 +132,9 @@ height: 20rem;
    width: 100%;
    
 }
+
+
+/* yabata tala farak farak background color rakhna ho photo ma  */
 #portfolio .grid .overlay {
     position: absolute;
     margin-top: 30px;
@@ -139,12 +142,110 @@ height: 20rem;
     width: 100%;
     opacity: 0;
     transition: .5s ease;
-    background-color: #527cec;
+    background-color: #534c96;
 
 }
 #portfolio .grid:hover .overlay {
     opacity: 1;
 }
+
+
+/* feri repeat garera arko photo ko lagi */
+#portfolio .grid .overlay1 {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #d8dd84;
+
+}
+
+#portfolio .grid:hover .overlay1 {
+    opacity: 1;
+}
+/* feri arko photo ko lagi */
+#portfolio .grid .overlay2 {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #dd8383;
+
+}
+
+#portfolio .grid:hover .overlay2 {
+    opacity: 1;
+}
+/* feri arko photo ko lagi */
+#portfolio .grid .overlay3 {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #7cdda6;
+
+}
+
+#portfolio .grid:hover .overlay3 {
+    opacity: 1;
+}
+#portfolio .grid .overlay4 {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #8d84de;
+
+}
+
+#portfolio .grid:hover .overlay4 {
+    opacity: 1;
+}
+#portfolio .grid .overlay5 {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #8c7663;
+
+}
+
+#portfolio .grid:hover .overlay5 {
+    opacity: 1;
+}
+#portfolio .grid .overlay {
+    position: absolute;
+    margin-top: 30px;
+    top: 0; bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0;
+    transition: .5s ease;
+    background-color: #9e9ea4;
+
+}
+
+#portfolio .grid:hover .overlay {
+    opacity: 1;
+}
+
+
+
+
+
+
+
+
+
  .text {
     color: white;
     font-size: 1.7rem;
