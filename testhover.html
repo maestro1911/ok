@@ -1,192 +1,362 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!doctype html>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sugam Dhungana</title>
 
-    <link rel="stylesheet" href="library/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>Sugam Dhungana</title>
-    <link rel="icon" type="image/x-icon" href="img/web1.jpg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --left-blue: #0b4aa0;
+      /* deep blue */
+      --left-blue-2: #07377a;
+      --muted: #6b7280;
+      --mint: #3ecaa0;
+      --panel-radius: 14px;
+      --max-width: 1200px;
+    }
 
-    <style>
-        /* Navbar adjustments */
-        .navbar {
-            height: 150px;
-            display: flex;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background-color: #f8f9fa;
-        }
+    * {
+      box-sizing: border-box
+    }
 
-        .navbar-brand img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-        }
+    body,
+    html {
+      height: 100%;
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: #f3f6fb;
+      color: #102026
+    }
 
-        .navbar-brand .su {
-            display: block;
-            text-align: center;
-            font-weight: bold;
-        }
+    .stage {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
 
-        .navbar-nav .nav-link {
-            font-size: 1.1rem;
-        }
+    /* main card sized like the screenshot */
+    .card {
+      width: 100%;
+      max-width: var(--max-width);
+      height: 86vh;
+      border-radius: var(--panel-radius);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 56% 44%;
+      box-shadow: 0 18px 50px rgba(15, 30, 50, 0.12);
+      background: #fff;
+    }
 
-        .search-form {
-            width: 400px;
-        }
+    /* LEFT PANEL */
+    .left {
+      position: relative;
+      background: linear-gradient(180deg, var(--left-blue) 0%, var(--left-blue-2) 100%);
+      color: #fff;
+      padding: 44px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-        /* Floating background */
-        .floating-photo {
-            position: absolute;
-            top: 150px; /* below navbar */
-            left: 0;
-            width: 100%;
-            height: calc(100vh - 150px);
-            object-fit: cover;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0.28;
-            filter: blur(0.5px) brightness(0.9);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-size: cover;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
-            mask-repeat: no-repeat;
-            mask-size: cover;
-        }
+    /* three vertical dots near left center */
+    .left .edge-dots {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-        /* Section scroll offset for anchor links */
-        section {
-            scroll-margin-top: 160px; /* navbar height + some margin */
-            position: relative;
-            z-index: 1;
-        }
+    .left .edge-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
 
-        /* Section padding */
-        section > .container {
-            padding-top: 80px;
-            padding-bottom: 80px;
-        }
+    /* Big headline and sub */
+    .left .headline {
+      max-width: 520px;
+    }
 
-        /* Basic styling */
-        #home h1, #home p {
-            text-align: center;
-            z-index: 1;
-            position: relative;
-        }
+    .left h1 {
+      margin: 0 0 14px 0;
+      font-size: 34px;
+      line-height: 1.02;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
 
-        #learnmore {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-        }
+    .left p.lead {
+      margin: 0 0 20px 0;
+      font-weight: 500;
+      opacity: 0.98;
+      font-size: 15px;
+      max-width: 480px;
+    }
 
-        /* Footer social icons */
-        footer ul#social {
-            list-style: none;
-            padding: 0;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
+    /* portrait block at lower-left with veil overlay */
+    .portrait-wrap {
+      position: relative;
+      width: 420px;
+      max-width: 52%;
+      min-height: 380px;
+      display: block;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(3, 18, 40, 0.25);
+    }
 
-        footer ul#social li a {
-            font-size: 1.5rem;
-            color: #333;
-        }
-    </style>
+    .portrait {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateY(-6%);
+      filter: contrast(.95) saturate(.9) brightness(.95);
+    }
+
+    
+    
+    /* mesh/net overlay using diagonal fine pattern (no external image) */
+
+    /* quote area beneath the portrait */
+    
+    .author {
+      margin-top: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.95)
+    }
+
+    /* RIGHT PANEL */
+    .right {
+      padding: 48px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+    }
+
+    .right-inner {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    /* small square logo + welcome */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .brand .logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #ddf8ee, #b6f0d6);
+      color: #07594b;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 6px 18px rgba(14, 96, 74, 0.08);
+    }
+
+    .brand .title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #0b2230
+    }
+
+    .welcome {
+      font-size: 28px;
+      margin: 6px 0 6px 0;
+      font-weight: 800;
+      color: #0b2230;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 18px
+    }
+
+    /* login controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px
+    }
+
+    .control-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e9f0f7;
+      background: #fbfeff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(8, 20, 40, 0.04);
+    }
+
+    .control-btn svg {
+      opacity: 0.8
+    }
+
+    /* small thin input & big CTA */
+    .thin-input {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e6eef6;
+      background: #f7fbfd;
+      color: #123;
+      font-weight: 600;
+    }
+
+    .cta {
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, var(--mint), #2db88c);
+      color: #fff;
+      font-weight: 800;
+      border: 0;
+      cursor: pointer;
+      box-shadow: 0 10px 26px rgba(62, 202, 160, 0.18);
+    }
+
+    /* little muted footer area */
+    .small {
+      font-size: 12px;
+      color: #9aa3ad;
+      margin-top: 16px
+    }
+
+    /* responsive */
+    @media (max-width:980px) {
+      .card {
+        grid-template-columns: 1fr;
+        height: auto;
+        border-radius: 12px;
+      }
+
+      .left {
+        padding: 28px;
+      }
+
+      .right {
+        padding: 28px
+      }
+
+      .portrait-wrap {
+        max-width: 100%;
+        width: 100%;
+        min-height: 280px
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="stage">
+    <div class="card" role="main" aria-label="Replica split landing">
+      <!-- LEFT -->
+      <section class="left" aria-labelledby="left-title">
+        <div class="edge-dots" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="headline" id="left-title">
+          <h1>WELCOME TO MY WEBSITE</h1>
+          <h2>
+            <pre style="text-align: left; margin-left: 10px; overflow-wrap: break-word;">
+When you don't know anyone,
+         <b style="color: red;">YOU CAN BE ANYONE.</b>
+  </pre>
+          </h2>
 
-    <!-- Navbar -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#home">
-                    <img src="img/1707897199579.jpg" alt="Logo" class="rounded-circle">
-                    <span class="su">SKD</span>
-                </a>
+        </div>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+          <div class="portrait-wrap" aria-hidden="true">
+            <!-- Replace src with your portrait to match screenshot closely -->
+            <img class="portrait" src="img/1707900375927.jpg" alt="Portrait">
+            <div class="veil"></div>
+            <div class="mesh"></div>
+          </div>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                        <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#resume">Resume</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#portfolio">Portfolio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                    </ul>
+          <div style="max-width:420px;">
+            <pre class="quote"> <b>विद्या ददाति विनयं, विनयाद् याति पात्रताम्।</b></pre>
 
-                    <form class="d-flex ms-3 search-form" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
-                </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="right" aria-labelledby="right-title">
+        <div class="right-inner">
+          <div class="brand">
+            <div class="logo" aria-hidden="true">P</div>
+            <div>
+              <div class="title">Welcome to the Network</div>
+              <div style="font-size:12px;color:var(--muted)">Join the community</div>
             </div>
-        </nav>
-    </header>
+          </div>
 
-    <!-- Floating background -->
-    <img src="img/1707897199579.jpg" alt="Sugam Background" class="floating-photo">
+          <h2 class="welcome" id="right-title">Connect with me?</h2>
+          <div class="subtitle">continue with a social platforms.</div>
 
-    <!-- Home Section -->
-    <section id="home">
-        <div class="container">
-            <h1>Hi, I am Sugam DHungana</h1>
-            <p>I'm a Geospatial Enthusiest, Student of Kathmandu University<br>Welcome to my Website.<br>
-                It is in Development phase wait for me to geeeet herbbb😂</p>
-            <a href="#resume" id="learnmore"><i class="fa fa-angle-down"></i>Learn More</a>
+          <div class="controls" role="form" aria-label="signup options">
+            <div class="control-btn" role="button" tabindex="0">
+              <!-- fake facebook icon -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M15.12 3H12.9C10.96 3 10.1 3.85 10.1 5.66V7.5H8v3.04h2.1V21h3.02v-10.46h1.9l.3-3.04h-2.2V5.24c0-.88.22-1.46 1.3-1.46h.88V3z"
+                  fill="#3b5998" />
+              </svg>
+              Continue with Facebook
+            </div>
+
+            <div class="control-btn" role="button" tabindex="0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M20 7H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1z" stroke="#6b7280"
+                  stroke-width="1.2" fill="none" />
+                <path d="M4 7h16" stroke="#e6eef6" stroke-width="1.2" />
+              </svg>
+              Join with email
+            </div>
+
+            <div class="thin-input" role="group" aria-label="email input">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 8.5l9 6 9-6" stroke="#6b7280" stroke-width="1.2" fill="none" />
+              </svg>
+              <span style="opacity:0.8">Enter your email</span>
+            </div>
+
+            <button class="cta" type="button">Create account</button>
+
+            <div class="small">Already a member? <strong style="color:#0b4aa0">Log in</strong></div>
+          </div>
         </div>
-    </section>
-
-    <!-- Resume Section -->
-    <section id="resume">
-        <div class="container">
-            <h2 class="title text-center">Resume</h2>
-            <p class="text-center">A Geospatial Enthusiest and Student of Kathmandu University</p>
-        </div>
-    </section>
-
-    <!-- Portfolio Section -->
-    <section id="portfolio">
-        <div class="container">
-            <h2 class="title text-center">Portfolio</h2>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact">
-        <div class="container">
-            <h2 class="title text-center">Contact</h2>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container text-center py-4">
-            <ul id="social">
-                <li><a href="#"><i class="fa fa-instagram"></i></a></li>
-                <li><a href="#"><i class="fa fa-facebook-square"></i></a></li>
-                <li><a href="#"><i class="fa fa-youtube"></i></a></li>
-                <li><a href="#"><i class="fa fa-github"></i></a></li>
-            </ul>
-        </div>
-    </footer>
-
-    <script src="js/jquery-3.1.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+      </aside>
+    </div>
+  </div>
 </body>
+
 </html>
