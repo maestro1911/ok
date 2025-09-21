@@ -28,6 +28,12 @@ width: 100%;
 
 }
 
+ .navbar {
+    /* ensures navbar is above other content */
+    z-index: 1000;
+}   
+
+
 .floating-photo {
     position: absolute;
     top: 85px;  /* space for header */
@@ -51,15 +57,10 @@ width: 100%;
     mask-size: cover;
 
     /* Subtle floating animation */
-    animation: floatBackground 20s ease-in-out infinite alternate;
+    
 }
-/*yo chai tyo navigation ko boarder ko animation ho
- floating photo le garako*/
-@keyframes floatBackground {
-    0% { transform: scale(1) translateY(0px); }
-    50% { transform: scale(1.005) translateY(-3px); } /* very subtle */
-    100% { transform: scale(1) translateY(0px); }
-}
+
+
 
 
 .container{
@@ -319,6 +320,7 @@ footer ul#social a:hover {
     color: #f22c2c;
 
  }
+
 
 
 

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="library/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Sugam Dhungana</title>
+    <link rel="icon" type="image/x-icon" href="img/web1.jpg">
+
+    <style>
+        /* Navbar adjustments */
+        .navbar {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .navbar-brand .su {
+            display: block;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-link {
+            font-size: 1.1rem;
+        }
+
+        .search-form {
+            width: 400px;
+        }
+
+        /* Floating background */
+        .floating-photo {
+            position: absolute;
+            top: 150px; /* below navbar */
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 150px);
+            object-fit: cover;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.28;
+            filter: blur(0.5px) brightness(0.9);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-size: cover;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%);
+            mask-repeat: no-repeat;
+            mask-size: cover;
+        }
+
+        /* Section scroll offset for anchor links */
+        section {
+            scroll-margin-top: 160px; /* navbar height + some margin */
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Section padding */
+        section > .container {
+            padding-top: 80px;
+            padding-bottom: 80px;
+        }
+
+        /* Basic styling */
+        #home h1, #home p {
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        #learnmore {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Footer social icons */
+        footer ul#social {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        footer ul#social li a {
+            font-size: 1.5rem;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#home">
+                    <img src="img/1707897199579.jpg" alt="Logo" class="rounded-circle">
+                    <span class="su">SKD</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#resume">Resume</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#portfolio">Portfolio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    </ul>
+
+                    <form class="d-flex ms-3 search-form" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Floating background -->
+    <img src="img/1707897199579.jpg" alt="Sugam Background" class="floating-photo">
+
+    <!-- Home Section -->
+    <section id="home">
+        <div class="container">
+            <h1>Hi, I am Sugam DHungana</h1>
+            <p>I'm a Geospatial Enthusiest, Student of Kathmandu University<br>Welcome to my Website.<br>
+                It is in Development phase wait for me to geeeet herbbb😂</p>
+            <a href="#resume" id="learnmore"><i class="fa fa-angle-down"></i>Learn More</a>
+        </div>
+    </section>
+
+    <!-- Resume Section -->
+    <section id="resume">
+        <div class="container">
+            <h2 class="title text-center">Resume</h2>
+            <p class="text-center">A Geospatial Enthusiest and Student of Kathmandu University</p>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio">
+        <div class="container">
+            <h2 class="title text-center">Portfolio</h2>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="container">
+            <h2 class="title text-center">Contact</h2>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center py-4">
+            <ul id="social">
+                <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+                <li><a href="#"><i class="fa fa-facebook-square"></i></a></li>
+                <li><a href="#"><i class="fa fa-youtube"></i></a></li>
+                <li><a href="#"><i class="fa fa-github"></i></a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+</body>
+</html>
