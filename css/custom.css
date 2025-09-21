@@ -275,12 +275,11 @@ height: 20rem;
     margin-bottom: -0.5rem;
 }
 footer {
-  background-color: #ebebe9;
-  width: 100%;
-  padding: 2rem;
-  display: flex;              /* make footer a flex container */
-  justify-content: space-between; /* space out left and right */
-  align-items: center;        /* vertically center items */
+    background-color: #ebebe9;
+    width: 100%;
+    height: auto;
+    padding: 2rem 0 4rem;  
+    
 }
 footer ul{
     list-style: none;
