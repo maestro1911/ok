@@ -9,14 +9,13 @@
 /* RESET */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Roboto',sans-serif;line-height:1.6;color:#333;scroll-behavior:smooth;}
-
+a{text-decoration:none;}
+button{cursor:pointer;}
 /* HEADER */
-header{
-  position:sticky;top:0;background:#141414;color:#fff;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.3);
-}
+header{position:sticky;top:0;background:#141414;color:#fff;z-index:1000;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
 header .container{max-width:1200px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:20px;}
 header h1{font-family:'Montserrat',sans-serif;font-size:2rem;color:#ffdd00;}
-nav a{color:#fff;text-decoration:none;margin-left:25px;font-weight:500;position:relative;transition:.3s;}
+nav a{color:#fff;margin-left:25px;font-weight:500;position:relative;transition:.3s;}
 nav a::after{content:'';display:block;width:0;height:2px;background:#ffdd00;position:absolute;bottom:-5px;left:0;transition:width .3s;}
 nav a:hover::after{width:100%;}
 
@@ -27,7 +26,7 @@ nav a:hover::after{width:100%;}
 }
 .hero h2{font-family:'Montserrat',sans-serif;font-size:3.5rem;margin-bottom:20px;text-shadow:2px 2px 10px rgba(0,0,0,0.7);}
 .hero p{font-size:1.3rem;margin-bottom:40px;max-width:700px;text-shadow:1px 1px 5px rgba(0,0,0,0.6);}
-.hero button{padding:15px 40px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;cursor:pointer;transition:.3s;box-shadow:0 5px 15px rgba(0,0,0,0.3);}
+.hero button{padding:15px 40px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;transition:.3s;box-shadow:0 5px 15px rgba(0,0,0,0.3);}
 .hero button:hover{transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.4);}
 
 /* SECTIONS */
@@ -48,7 +47,7 @@ h2{text-align:center;font-size:3rem;margin-bottom:40px;font-family:'Montserrat',
 .product-card .info h3{margin-bottom:10px;font-family:'Montserrat',sans-serif;color:#141414;}
 .product-card .info p{margin-bottom:10px;color:#666;}
 .product-card .info button{
-  padding:10px 20px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;cursor:pointer;transition:.3s;
+  padding:10px 20px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;transition:.3s;
 }
 .product-card .info button:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,0.2);}
 
@@ -67,18 +66,31 @@ h2{text-align:center;font-size:3rem;margin-bottom:40px;font-family:'Montserrat',
 
 /* CTA */
 .cta{background:#141414;color:#fff;text-align:center;}
-.cta button{padding:15px 40px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;font-size:1.1rem;cursor:pointer;transition:.3s;}
+.cta button{padding:15px 40px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;font-size:1.1rem;transition:.3s;}
 .cta button:hover{transform:scale(1.05);box-shadow:0 8px 20px rgba(0,0,0,0.4);}
 
 /* CONTACT */
 .contact{text-align:center;}
 .contact form{max-width:600px;margin:auto;display:flex;flex-direction:column;gap:20px;}
 .contact input,.contact textarea{padding:15px;border-radius:10px;border:1px solid #ccc;font-size:1rem;resize:none;}
-.contact button{padding:15px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;font-size:1.1rem;cursor:pointer;transition:.3s;}
+.contact button{padding:15px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;font-size:1.1rem;transition:.3s;}
 .contact button:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,0.3);}
 
+/* TESTIMONIALS */
+.testimonials{background:#f2f2f2;padding:80px 20px;text-align:center;}
+.testimonials .testimonial{max-width:600px;margin:auto;margin-bottom:40px;font-style:italic;color:#555;}
+.testimonials h3{margin-top:10px;color:#141414;font-family:'Montserrat',sans-serif;}
+
+/* NEWSLETTER */
+.newsletter{background:#141414;color:#fff;text-align:center;padding:60px 20px;}
+.newsletter input{padding:12px 15px;border-radius:50px;border:none;width:250px;margin-right:10px;}
+.newsletter button{padding:12px 25px;border:none;border-radius:50px;background:linear-gradient(90deg,#ffdd00,#ff9f00);color:#141414;font-weight:bold;transition:.3s;}
+.newsletter button:hover{transform:scale(1.05);}
+
 /* FOOTER */
-footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-size:.9rem;}
+footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-size:.9rem;display:flex;flex-direction:column;gap:10px;}
+footer .socials a{color:#ffdd00;margin:0 10px;font-size:1.2rem;transition:.3s;}
+footer .socials a:hover{color:#fff;}
 
 /* MODAL */
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:2000;}
@@ -88,7 +100,16 @@ footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-si
 .modal-content p{margin-bottom:10px;color:#555;}
 .modal-close{position:absolute;top:15px;right:20px;font-size:1.5rem;font-weight:bold;cursor:pointer;color:#333;}
 
-/* CART */
+/* CART SIDEBAR */
+.cart-sidebar{
+  position:fixed;top:0;right:-350px;width:350px;height:100%;background:#fff;box-shadow:-5px 0 15px rgba(0,0,0,0.3);transition:.3s;z-index:2500;padding:20px;overflow-y:auto;
+}
+.cart-sidebar.active{right:0;}
+.cart-sidebar h3{margin-bottom:20px;font-family:'Montserrat',sans-serif;color:#141414;}
+.cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:1px solid #ccc;padding-bottom:10px;}
+.cart-item button{background:red;color:#fff;border:none;border-radius:50%;width:25px;height:25px;cursor:pointer;}
+
+/* CART BUTTON */
 .cart{position:fixed;top:20px;right:20px;background:#ffdd00;padding:15px 20px;border-radius:50px;cursor:pointer;z-index:1500;font-weight:bold;box-shadow:0 5px 15px rgba(0,0,0,0.3);transition:.3s;}
 .cart:hover{transform:scale(1.05);}
 
@@ -124,36 +145,13 @@ footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-si
 <!-- Featured Products -->
 <section class="products" id="products">
   <h2>Featured Products</h2>
-  <div class="product-grid">
-    <div class="product-card" onclick="openModal('Product 1',49.99,'https://via.placeholder.com/400x300')">
-      <img src="https://via.placeholder.com/400x300" alt="Product 1">
-      <div class="info">
-        <h3>Product 1</h3>
-        <p>$49.99</p>
-        <button>Add to Cart</button>
-      </div>
-    </div>
-    <div class="product-card" onclick="openModal('Product 2',29.99,'https://via.placeholder.com/400x300')">
-      <img src="https://via.placeholder.com/400x300" alt="Product 2">
-      <div class="info">
-        <h3>Product 2</h3>
-        <p>$29.99</p>
-        <button>Add to Cart</button>
-      </div>
-    </div>
-    <div class="product-card" onclick="openModal('Product 3',19.99,'https://via.placeholder.com/400x300')">
-      <img src="https://via.placeholder.com/400x300" alt="Product 3">
-      <div class="info">
-        <h3>Product 3</h3>
-        <p>$19.99</p>
-        <button>Add to Cart</button>
-      </div>
-    </div>
+  <div class="product-grid" id="featuredGrid">
+    <!-- Featured products will be added dynamically -->
   </div>
 </section>
 
 <!-- Product Listing -->
-<section class="product-listing" id="product-listing">
+<section id="product-listing">
   <h2>Shop Our Products</h2>
   <div class="filters">
     <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
@@ -161,53 +159,10 @@ footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-si
       <option value="">Sort by</option>
       <option value="price-low">Price: Low to High</option>
       <option value="price-high">Price: High to Low</option>
-      <option value="popular">Most Popular</option>
     </select>
   </div>
   <div class="product-grid" id="productGrid">
-    <div class="product-card" onclick="openModal('Product 1',49.99,'https://via.placeholder.com/250x200')">
-      <img src="https://via.placeholder.com/250x200" alt="Product 1">
-      <div class="info">
-        <h3>Product 1</h3>
-        <p>$49.99</p>
-        <p>⭐⭐⭐⭐☆</p>
-        <button onclick="addToCart(event,'Product 1',49.99)">Add to Cart</button>
-      </div>
-    </div>
-    <div class="product-card" onclick="openModal('Product 2',29.99,'https://via.placeholder.com/250x200')">
-      <img src="https://via.placeholder.com/250x200" alt="Product 2">
-      <div class="info">
-        <h3>Product 2</h3>
-        <p>$29.99</p>
-        <p>⭐⭐⭐⭐⭐</p>
-        <button onclick="addToCart(event,'Product 2',29.99)">Add to Cart</button>
-      </div>
-    </div>
-    <div class="product-card" onclick="openModal('Product 3',19.99,'https://via.placeholder.com/250x200')">
-      <img src="https://via.placeholder.com/250x200" alt="Product 3">
-      <div class="info">
-        <h3>Product 3</h3>
-        <p>$19.99</p>
-        <p>⭐⭐⭐☆☆</p>
-        <button onclick="addToCart(event,'Product 3',19.99)">Add to Cart</button>
-      </div>
-    </div>
-    <div class="product-card" onclick="openModal('Product 4',99.99,'https://via.placeholder.com/250x200')">
-      <img src="https://via.placeholder.com/250x200" alt="Product 4">
-      <div class="info">
-        <h3>Product 4</h3>
-        <p>$99.99</p>
-        <p>⭐⭐⭐⭐⭐</p>
-        <button onclick="addToCart(event,'Product 4',99.99)">Add to Cart</button>
-      </div>
-    </div>
-  </div>
-  <div class="pagination">
-    <button>&laquo; Prev</button>
-    <button>1</button>
-    <button>2</button>
-    <button>3</button>
-    <button>Next &raquo;</button>
+    <!-- Products will be added dynamically -->
   </div>
 </section>
 
@@ -221,6 +176,20 @@ footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-si
 <section class="cta">
   <h2>Ready to Grow Your Business?</h2>
   <button onclick="document.getElementById('contact').scrollIntoView()">Get Started Now</button>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials">
+  <h2>What Our Clients Say</h2>
+  <div class="testimonial">"BusinessPro transformed our sales! Highly recommend." <h3>- Jane D.</h3></div>
+  <div class="testimonial">"Amazing support and excellent products!" <h3>- Mark S.</h3></div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter">
+  <h2>Subscribe to Our Newsletter</h2>
+  <input type="email" placeholder="Enter your email">
+  <button>Subscribe</button>
 </section>
 
 <!-- Contact -->
@@ -237,6 +206,11 @@ footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-si
 <!-- Footer -->
 <footer>
   &copy; 2025 BusinessPro. All rights reserved.
+  <div class="socials">
+    <a href="#">&#x1F426;</a>
+    <a href="#">&#x1F4F1;</a>
+    <a href="#">&#x1F4F7;</a>
+  </div>
 </footer>
 
 <!-- Modal -->
@@ -252,64 +226,101 @@ footer{background:#141414;color:#fff;text-align:center;padding:30px 20px;font-si
   </div>
 </div>
 
-<!-- Cart -->
-<div class="cart" onclick="viewCart()">Cart: <span id="cartCount">0</span></div>
+<!-- Cart Sidebar -->
+<div class="cart-sidebar" id="cartSidebar">
+  <h3>Your Cart</h3>
+  <div id="cartItems"></div>
+  <p>Total: $<span id="cartTotal">0.00</span></p>
+  <button onclick="checkout()">Checkout</button>
+</div>
+
+<!-- Cart Button -->
+<div class="cart" onclick="toggleCart()">Cart: <span id="cartCount">0</span></div>
 
 <script>
-// Modal JS
-let selectedProduct = {};
-function openModal(title, price, img){
-  selectedProduct = {title, price};
-  document.getElementById('modalTitle').innerText = title;
-  document.getElementById('modalPrice').innerText = `$${price.toFixed(2)}`;
-  document.getElementById('modalImage').src = img;
-  document.getElementById('productModal').style.display = 'flex';
-}
-function closeModal(){
-  document.getElementById('productModal').style.display = 'none';
+// Product Data
+const products = [
+  {id:1,title:"Product 1",price:49.99,img:"https://via.placeholder.com/400x300"},
+  {id:2,title:"Product 2",price:29.99,img:"https://via.placeholder.com/400x300"},
+  {id:3,title:"Product 3",price:19.99,img:"https://via.placeholder.com/400x300"},
+  {id:4,title:"Product 4",price:99.99,img:"https://via.placeholder.com/400x300"},
+  {id:5,title:"Product 5",price:59.99,img:"https://via.placeholder.com/400x300"},
+  {id:6,title:"Product 6",price:39.99,img:"https://via.placeholder.com/400x300"},
+];
+
+// Populate grids
+const featuredGrid = document.getElementById('featuredGrid');
+const productGrid = document.getElementById('productGrid');
+products.slice(0,3).forEach(p=>addProductCard(p,featuredGrid));
+products.forEach(p=>addProductCard(p,productGrid));
+
+function addProductCard(p,grid){
+  const div = document.createElement('div');
+  div.className='product-card';
+  div.innerHTML=`<img src="${p.img}" alt="${p.title}">
+    <div class="info">
+      <h3>${p.title}</h3>
+      <p>$${p.price.toFixed(2)}</p>
+      <button onclick="addToCart(event,'${p.title}',${p.price})">Add to Cart</button>
+    </div>`;
+  div.onclick=()=>openModal(p.title,p.price,p.img);
+  grid.appendChild(div);
 }
 
-// Cart JS
-let cart = [];
-function addToCart(event, title, price){
+// Modal
+let selectedProduct={};
+function openModal(title,price,img){
+  selectedProduct={title,price};
+  document.getElementById('modalTitle').innerText=title;
+  document.getElementById('modalPrice').innerText=`$${price.toFixed(2)}`;
+  document.getElementById('modalImage').src=img;
+  document.getElementById('productModal').style.display='flex';
+}
+function closeModal(){document.getElementById('productModal').style.display='none';}
+
+// Cart
+let cart=[];
+function addToCart(event,title,price){
   event.stopPropagation();
-  cart.push({title, price});
-  document.getElementById('cartCount').innerText = cart.length;
+  cart.push({title,price});
+  updateCartUI();
   alert(`${title} added to cart`);
 }
-function addToCartFromModal(){
-  cart.push(selectedProduct);
-  document.getElementById('cartCount').innerText = cart.length;
-  alert(`${selectedProduct.title} added to cart`);
-  closeModal();
+function addToCartFromModal(){cart.push(selectedProduct);updateCartUI();closeModal();}
+function toggleCart(){document.getElementById('cartSidebar').classList.toggle('active');}
+function updateCartUI(){
+  document.getElementById('cartCount').innerText=cart.length;
+  const cartItems = document.getElementById('cartItems');
+  cartItems.innerHTML='';
+  let total=0;
+  cart.forEach((item,index)=>{
+    total+=item.price;
+    const div = document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`${item.title} - $${item.price.toFixed(2)} <button onclick="removeFromCart(${index})">&times;</button>`;
+    cartItems.appendChild(div);
+  });
+  document.getElementById('cartTotal').innerText=total.toFixed(2);
 }
-function viewCart(){
-  if(cart.length===0){alert('Cart is empty');return;}
-  let message = 'Your Cart:\n';
-  let total = 0;
-  cart.forEach(item=>{message+=`${item.title} - $${item.price}\n`; total+=item.price;});
-  message+=`Total: $${total.toFixed(2)}`;
-  alert(message);
-}
+function removeFromCart(index){cart.splice(index,1);updateCartUI();}
+function checkout(){if(cart.length===0){alert('Cart is empty');return;} alert('Proceed to checkout');}
 
-// Filter/Search JS
+// Search & Sort
 function filterProducts(){
-  let input = document.getElementById('search').value.toLowerCase();
-  let products = document.getElementById('productGrid').children;
-  Array.from(products).forEach(p=>{
-    let title = p.querySelector('h3').innerText.toLowerCase();
-    p.style.display = title.includes(input)?'block':'none';
+  const input = document.getElementById('search').value.toLowerCase();
+  const items = productGrid.children;
+  Array.from(items).forEach(item=>{
+    const title=item.querySelector('h3').innerText.toLowerCase();
+    item.style.display=title.includes(input)?'block':'none';
   });
 }
 function sortProducts(){
-  let sort = document.getElementById('sort').value;
-  let grid = document.getElementById('productGrid');
-  let items = Array.from(grid.children);
+  const sort=document.getElementById('sort').value;
+  const items=Array.from(productGrid.children);
   if(sort==='price-low') items.sort((a,b)=>parseFloat(a.querySelector('p').innerText.replace('$',''))-parseFloat(b.querySelector('p').innerText.replace('$','')));
   else if(sort==='price-high') items.sort((a,b)=>parseFloat(b.querySelector('p').innerText.replace('$',''))-parseFloat(a.querySelector('p').innerText.replace('$','')));
-  grid.innerHTML=''; items.forEach(i=>grid.appendChild(i));
+  productGrid.innerHTML=''; items.forEach(i=>productGrid.appendChild(i));
 }
 </script>
-
 </body>
 </html>
