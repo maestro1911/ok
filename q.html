@@ -1,146 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sugam Dhungana</title>
-    <link rel="icon" type="image/x-icon" href="img/web1.jpg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BusinessPro E-Commerce</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Roboto', sans-serif; color: #333; line-height: 1.6; scroll-behavior: smooth; }
 
-    <!-- Bootstrap & Font Awesome -->
-    <link rel="stylesheet" href="library/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      background: #141414;
+      color: #fff;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    header .container {
+      max-width: 1200px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+    }
+    header h1 { font-family: 'Montserrat', sans-serif; font-size: 2rem; color: #ffdd00; }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 25px;
+      font-weight: 500;
+      position: relative;
+      transition: 0.3s;
+    }
+    nav a::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 2px;
+      background: #ffdd00;
+      transition: width .3s;
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+    }
+    nav a:hover::after { width: 100%; }
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1600x700') center/cover no-repeat;
+      height: 700px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+      padding: 0 20px;
+    }
+    .hero h2 { font-family: 'Montserrat', sans-serif; font-size: 3.5rem; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.7); }
+    .hero p { font-size: 1.3rem; margin-bottom: 40px; max-width: 700px; text-shadow: 1px 1px 5px rgba(0,0,0,0.6); }
+    .hero button {
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #ffdd00, #ff9f00);
+      color: #141414;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .hero button:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+
+    /* Products Section */
+    .products {
+      padding: 80px 20px;
+      background: #f9f9f9;
+    }
+    .products h2 { text-align: center; font-size: 3rem; margin-bottom: 60px; font-family: 'Montserrat', sans-serif; color: #141414; }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-align: center;
+    }
+    .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+    .product-card img { width: 100%; height: 220px; object-fit: cover; transition: transform 0.3s; }
+    .product-card:hover img { transform: scale(1.05); }
+    .product-card .info { padding: 25px; }
+    .product-card .info h3 { margin-bottom: 15px; font-family: 'Montserrat', sans-serif; color: #141414; }
+    .product-card .info p { margin-bottom: 10px; color: #666; }
+    .product-card .info button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #ffdd00, #ff9f00);
+      color: #141414;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .product-card .info button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+    /* Product Listing Section */
+    .product-listing { padding: 80px 20px; background: #f2f2f2; }
+    .product-listing h2 { text-align: center; font-size: 3rem; margin-bottom: 40px; font-family: 'Montserrat', sans-serif; color: #141414; }
+    .filters { display: flex; justify-content: center; gap: 20px; margin-bottom: 40px; flex-wrap: wrap; }
+    .filters input, .filters select { padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+    .product-listing .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; max-width: 1200px; margin: auto; }
+    .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 40px; flex-wrap: wrap; }
+    .pagination button { padding: 10px 15px; border: none; border-radius: 5px; background: #141414; color: #fff; cursor: pointer; transition: 0.3s; }
+    .pagination button:hover { background: #ff9f00; }
+
+    /* About Section */
+    .about {
+      padding: 80px 20px;
+      background: linear-gradient(90deg, #ffdd00, #ff9f00);
+      color: #141414;
+      text-align: center;
+    }
+    .about h2 { margin-bottom: 30px; font-size: 3rem; font-family: 'Montserrat', sans-serif; }
+    .about p { max-width: 800px; margin: auto; font-size: 1.2rem; line-height: 1.8; }
+
+    /* CTA Section */
+    .cta {
+      background: #141414;
+      color: #fff;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .cta h2 { font-size: 2.5rem; margin-bottom: 20px; font-family: 'Montserrat', sans-serif; }
+    .cta button {
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #ffdd00, #ff9f00);
+      color: #141414;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .cta button:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+
+    /* Contact Section */
+    .contact {
+      padding: 80px 20px;
+      background: #f9f9f9;
+      text-align: center;
+    }
+    .contact h2 { font-size: 3rem; margin-bottom: 40px; font-family: 'Montserrat', sans-serif; color: #141414; }
+    .contact form { max-width: 600px; margin: auto; display: flex; flex-direction: column; gap: 20px; }
+    .contact input, .contact textarea {
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      resize: none;
+    }
+    .contact button {
+      padding: 15px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #ffdd00, #ff9f00);
+      color: #141414;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .contact button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+    /* Footer */
+    footer {
+      background: #141414;
+      color: #fff;
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 0.9rem;
+    }
+
+    @media(max-width:768px){
+      .hero h2 { font-size: 2.5rem; }
+      .products h2, .about h2, .contact h2, .product-listing h2 { font-size: 2rem; }
+    }
+  </style>
 </head>
-
 <body>
-    <!-- Navbar -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
-            <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="#">
-                    <img src="img/1707897199579.jpg" alt="Logo" class="rounded-circle logo-img">
-                    <span class="brand-name ms-3">SugamSpace</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                    <ul class="navbar-nav">
-                        <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#resume">Resume</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#portfolio">Portfolio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
 
-    <!-- Hero Section with Quote -->
-    <section id="hero">
-        <img src="img/1707897199579.jpg" alt="Background" class="hero-bg">
-        <div class="hero-content text-center">
-            <p class="quote">"विद्या ददाति विनयं, विनयाद् याति पात्रताम्।"</p>
-            <h1>Hi, Welcome To My Website</h1>
-            <p>I am a Student of Kathmandu University. This website is in development phase. Wait for me to geeeet😂</p>
-            <a href="#resume" class="btn btn-outline-dark btn-lg mt-3">Learn More <i class="fa fa-angle-down"></i></a>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <h1>BusinessPro</h1>
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#products">Featured</a>
+        <a href="#product-listing">Shop</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div>
+      <h2>Elevate Your Business Online</h2>
+      <p>Showcase premium products and reach a global audience effortlessly.</p>
+      <button>Explore Products</button>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section class="products" id="products">
+    <h2>Featured Products</h2>
+    <div class="product-grid">
+      <div class="product-card">
+        <img src="https://via.placeholder.com/400x300" alt="Product 1">
+        <div class="info">
+          <h3>Product 1</h3>
+          <p>$49.99</p>
+          <button>Add to Cart</button>
         </div>
-    </section>
-
-    <!-- Resume Section -->
-    <section id="resume" class="section-padding">
-        <div class="container">
-            <h2 class="text-center mb-4">Hi, I am Sugam Dhungana</h2>
-            <p class="text-center mb-5">A Geospatial Enthusiast and Student of Kathmandu University</p>
-            <div class="row text-center">
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="img/1707900376001.jpg" class="card-img-top" alt="Program">
-                        <div class="card-body">
-                            <h5 class="card-title">Mera Santan</h5>
-                            <p class="card-text">A Geospatial Enthusiast and Student of Kathmandu University</p>
-                            <a href="#" class="btn btn-primary">View More</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="img/1707897199623.jpg" class="card-img-top" alt="Program">
-                        <div class="card-body">
-                            <h5 class="card-title">Mero Hajurmamu</h5>
-                            <p class="card-text">A Geospatial Enthusiast and Student of Kathmandu University</p>
-                            <a href="#" class="btn btn-primary">View More</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="img/1707897199579.jpg" class="card-img-top" alt="Program">
-                        <div class="card-body">
-                            <h5 class="card-title">Mero Hajurbau</h5>
-                            <p class="card-text">A Geospatial Enthusiast and Student of Kathmandu University</p>
-                            <a href="#" class="btn btn-primary">View More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/400x300" alt="Product 2">
+        <div class="info">
+          <h3>Product 2</h3>
+          <p>$29.99</p>
+          <button>Add to Cart</button>
         </div>
-    </section>
-
-    <!-- Portfolio Section -->
-    <section id="portfolio" class="section-padding bg-light">
-        <div class="container">
-            <h2 class="text-center mb-4">Portfolio</h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="portfolio-item">
-                        <img src="img/1707897199623.jpg" alt="Project" class="img-fluid">
-                        <div class="overlay">
-                            <a href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq" target="_blank"
-                                class="btn btn-light">Watch Demo</a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Repeat for other portfolio items -->
-            </div>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/400x300" alt="Product 3">
+        <div class="info">
+          <h3>Product 3</h3>
+          <p>$19.99</p>
+          <button>Add to Cart</button>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section-padding">
-        <div class="container">
-            <h2 class="text-center mb-4">Contact Me</h2>
-            <div class="text-center">
-                <iframe
-                    src="https://docs.google.com/forms/d/e/1FAIpQLSekzrewpKMkLqwDjFI7zG1-xlLF44Z6hbDuBKNRlp4g-LzGKg/viewform?embedded=true"
-                    width="100%" height="300" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-            </div>
-            <p class="text-center mt-3"><strong>Email:</strong> manage19114@gmail.com | <strong>Phone:</strong> +977
-                9749404937</p>
+  <!-- Product Listing Section -->
+  <section class="product-listing" id="product-listing">
+    <h2>Shop Our Products</h2>
+    <div class="filters">
+      <input type="text" placeholder="Search products...">
+      <select>
+        <option value="">Sort by</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="popular">Most Popular</option>
+      </select>
+    </div>
+    <div class="product-grid">
+      <div class="product-card">
+        <img src="https://via.placeholder.com/250x200" alt="Product 1">
+        <div class="info">
+          <h3>Product 1</h3>
+          <p>$49.99</p>
+          <p>⭐⭐⭐⭐☆</p>
+          <button>Add to Cart</button>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-4">
-        <div class="container text-center">
-            <p>© 2025 Sugam Dhungana | Follow me on:</p>
-            <div class="social-links">
-                <a href="https://www.instagram.com/maestro_19114" target="_blank"><i class="fa fa-instagram"></i></a>
-                <a href="https://www.facebook.com/sugamspace" target="_blank"><i class="fa fa-facebook-square"></i></a>
-                <a href="https://www.youtube.com" target="_blank"><i class="fa fa-youtube"></i></a>
-                <a href="https://github.com/maestro1911" target="_blank"><i class="fa fa-github"></i></a>
-            </div>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/250x200" alt="Product 2">
+        <div class="info">
+          <h3>Product 2</h3>
+          <p>$29.99</p>
+          <p>⭐⭐⭐⭐⭐</p>
+          <button>Add to Cart</button>
         </div>
-    </footer>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/250x200" alt="Product 3">
+        <div class="info">
+          <h3>Product 3</h3>
+          <p>$19.99</p>
+          <p>⭐⭐⭐☆☆</p>
+          <button>Add to Cart</button>
+        </div>
+      </div>
+      <div class="product-card">
+        <img src="https://via.placeholder.com/250x200" alt="Product 4">
+        <div class="info">
+          <h3>Product 4</h3>
+          <p>$99.99</p>
+          <p>⭐⭐⭐⭐⭐</p>
+          <button>Add to Cart</button>
+        </div>
+      </div>
+    </div>
+    <div class="pagination">
+      <button>&laquo; Prev</button>
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>Next &raquo;</button>
+    </div>
+  </section>
 
-    <!-- JS -->
-    <script src="js/jquery-3.1.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+  <!-- About Section -->
+  <section class="about" id="about">
+    <h2>About BusinessPro</h2>
+    <p>At BusinessPro, we help businesses thrive online. Our mission is to deliver exceptional products and create an unmatched shopping experience. Trust, quality, and innovation drive everything we do.</p>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <h2>Ready to Grow Your Business?</h2>
+    <button>Get Started Now</button>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact" id="contact">
+    <h2>Contact Us</h2>
+    <form>
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea placeholder="Your Message" rows="5" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    &copy; 2025 BusinessPro. All rights reserved.
+  </footer>
+
 </body>
-
 </html>
