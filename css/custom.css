@@ -16,12 +16,16 @@ width: 100%;
     transition: color 0.3s ease;
 }
 .su:hover {
-    color: #36ff33;  /* change this to any color you want */
+    color: #3333ff;  /* change this to any color you want */
 }
 
 .nav-link {
      font-size: 1.2rem;
-        color: #ffffff;       
+        color: #ffffff;
+        transition: color 0.3s ease;       
+}
+.nav-link:hover {
+    color: #0015ff;  /* pick any hover color */
 }
 
 /* .container-fluid{
@@ -89,7 +93,7 @@ width: 100%;
     margin-top: 2.6rem;
     font-size: 2rem;
     font-weight: bold;
-    color: #ff0000;
+    color: #0400ff;
     z-index: 1; /* Ensure text is above background */
 }
 #name {
