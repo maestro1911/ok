@@ -12,21 +12,31 @@ width: 100%;
 
 .su {
     font-size: 38px;
-    color: #228806;
+    color: #ffffff;
 }
 
 .nav-link {
      font-size: 1.2rem;
-        color: #000000;       
+        color: #ffffff;       
 }
 
-.container-fluid{
+/* .container-fluid{
     position: absolute;
     top: 0px;
      height: 85px;
     background-color: #d2cece;
 
+} */
+ .container-fluid {
+    position: fixed;   /* instead of absolute */
+    top: 0;
+    left: 0;
+    width: 100%;       /* make it span across */
+    height: 85px;
+    background-color: #000000;
+    z-index: 1000;     /* keep it above other elements */
 }
+
 
  .navbar {
     /* ensures navbar is above other content */
