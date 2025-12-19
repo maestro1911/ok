@@ -359,19 +359,17 @@ footer ul#social a:hover {
 /* PROFESSIONAL MOBILE RESPONSIVE  */
 /* Same design, better scaling     */
 /* =============================== */
-
 @media (max-width: 768px) {
 
-  html, body {
-    overflow-x: hidden;
+  /* FORCE override inline styles */
+  img[style],
+  span[style],
+  form[style],
+  div[style] {
+    max-width: 100% !important;
   }
 
-  /* NAVBAR */
-  .container-fluid {
-    height: auto;
-    padding: 0.6rem 1rem;
-  }
-
+  /* Logo image */
   .navbar-brand img {
     width: 90px !important;
     height: 90px !important;
@@ -379,86 +377,41 @@ footer ul#social a:hover {
   }
 
   .su {
-    font-size: 22px;
     left: 120% !important;
+    font-size: 22px !important;
   }
 
-  /* SEARCH BAR – stays usable */
-  form.d-flex.position-absolute {
+  /* Search bar */
+  form.d-flex {
     position: static !important;
-    transform: none !important;
     width: 100% !important;
-    margin-top: 1rem;
   }
 
-  /* BACKGROUND IMAGE */
-  .floating-photo {
-    height: 100%;
-    top: 70px;
-  }
-
-  /* HOME SECTION TEXT */
-  #quote {
-    font-size: 1.4rem;
-    margin-top: 1.8rem;
-  }
-
-  #name {
-    font-size: 2.3rem;
-    margin-top: 3rem;
-  }
-
-  #tagline {
-    font-size: 1.15rem;
-  }
-
-  /* BUTTON */
-  #learnmore {
-    font-size: 1rem;
-    padding: 0.5rem 1.2rem;
-  }
-
-  /* RESUME CARDS */
-  #resume .card {
-    max-width: 100%;
-    margin: auto;
-  }
-
-  /* PORTFOLIO */
-  #portfolio img {
-    margin-top: 20px;
-  }
-
-  .text {
-    font-size: 1.2rem;
-    padding: 0.5rem;
-  }
-
+  /* Remove fixed margins */
   .hari {
-    width: 100%;
-    margin-right: 0;
+    margin-right: 0 !important;
   }
 
-  /* FLEX VIDEO SECTION FIX */
-  div[style*="display: flex"] {
-    flex-direction: column;
-    gap: 1rem;
+  /* Floating background */
+  .floating-photo {
+    height: 100% !important;
+    top: 70px !important;
   }
 
+  /* iframe fix */
   iframe {
     width: 100% !important;
     height: 220px !important;
   }
 
-  /* FOOTER */
-  footer ul,
-  footer ul#social {
-    text-align: center;
+  /* flex row fix */
+  div[style*="display: flex"] {
+    flex-direction: column !important;
   }
 
-  .push, .pus {
-    text-align: center;
-    margin-right: 0;
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
   }
 }
 
