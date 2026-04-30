@@ -1,571 +1,321 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wanderlust — Discover The World Near You</title>
 
-    <link rel="stylesheet" href="library/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="library/font-awesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="css/animate.css">
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/custom.css">
-    <link rel="stylesheet" href="css/custom.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Bebas+Neue&display=swap" rel="stylesheet">
 
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-    <title>Sugam Dhungana</title>
-    <link rel="icon" type="image/x-icon" href="img/web1.jpg">
-
+  <link rel="stylesheet" href="style.css"/>
 </head>
-
-
 <body>
 
-
-
-
-
-    <!-- header ma naviagation bar rakhxam-->
-    <header>
-        <nav class="navbar navbar-expand-lg bg-body-tertiary">
-            <div class="container-fluid">
-
-                <!--header ko photo-->
-                <a class="navbar-brand position-relative"
-                    href="https://www.youtube.com/embed/kirZ-M7HSHU?si=fUMfc6TZA9R66zE0" target="_main"
-                    style="height:69px;">
-                    <img src="img/1707897199579.jpg" loading="eager" alt="Logo" class="rounded-circle translate-middle-y"
-                        style="width:150px; height:150px; object-fit:cover; margin-top:62.5px;"><!--yo margin chai photo tala mathi garna ho-->
-                    <span class="su"
-                        style="position:absolute; left:175%; bottom:0%; transform:translateX(-50%);  font-weight:bold;">
-                        <b>SugamSpace</b>
-                    </span>
-                </a>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-
-                <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-                    <ul class="navbar-nav  mb-2 mb-lg-0">
-
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page"
-                                href="#home">Home</a><!--jaba home click huncha home ko section ma jancha vanya ho-->
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="#resume">Resume</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="#portfolio">Portfolio</a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="#social">Contact</a>
-                        </li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <li class="nav-item">
-                            <a class="nav-link" aria-disabled="true">button halna baki</a>
-                        </li>
-                    </ul>
-
-                    <form class="d-flex position-absolute top-50 start-50 translate-middle" role="search"
-                        style="width:500px; z-index: 2000;">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
-                            name="q" />
-                        <button class="btn btn-outline-success" type="submit">Search</button>
-                    </form>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-            </div>
-        </nav>
-
-    </header>
-
-
-
-
-
-
-
-
-
-    <img src="img/1707897199579.jpg" alt="Sugam Background" class="floating-photo">
-    <!--home-->
-    <section id="home">
-
-        <div class="container">
-            <h2 id="quote">विद्या ददाति विनयं, विनयाद् याति पात्रताम्।</h2>
-            <h1 id="name">Hi, Welcome To My Website.</h1>
-            <p id="tagline">I am a Student of Kathmandu University<br>This website
-                is in Development phase wait for me to geeeet😂</p>
-            <a href="#resume" id="learnmore"><i class="fa fa-angle-down"></i>Learn More</a>
-        </div>
-
-    </section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!--Resume section-->
-    <section id="resume">
-        <div class="container">
-            <div class="row">
-                <h2 class="title text-center w-100">Hi, I am Sugam DHungana.</h2>
-                <p class="about text-center w-75 mx-auto">A Geospatial Enthusiest and Student of Kathmandu University
-                </p>
-            </div>
-
-
-            <div class="row">
-
-
-                <h2 class="title text-center w-100">I love Spatial data.</h2>
-            </div>
-
-
-
-            <div class="row">
-                <div class="col-md-4 py-3"> <!--100% width vako column 12 huncha so 3 ta column rakhna ho -->
-
-                    <!--yo chai card ho-->
-                    <div class="card" style="max-width: 18rem;">
-                        <img src="img/1717064830755.jpg" class="card-img-top" loading="eager" alt="programming">
-                        <div class="card-body">
-                            <h5 class="card-title">mera santan </h5>
-                            <p class="card-text">A Geospatial Enthusiest and Student of Kathmandu University</p>
-                            <a href="#" class="btn btn-primary">herum nata</a>
-                        </div>
-                    </div>
-                </div>
-
-
-
-                <div class="col-md-4 py-3"> <!--100% width vako column 12 huncha so 3 ta column rakhna ho -->
-
-                    <!--yo chai card ho-->
-                    <div class="card" style="max-width: 18rem;">
-                        <img src="img/1707897199623.jpg" class="card-img-top" loading="eager" alt="programming">
-                        <div class="card-body">
-                            <h5 class="card-title">mero hajurmamu</h5>
-                            <p class="card-text">A Geospatial Enthusiest and Student of Kathmandu University</p>
-                            <a href="#" class="btn btn-primary">herum nata</a>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-                <div class="col-md-4 py-3"> <!--100% width vako column 12 huncha so 3 ta column rakhna ho -->
-
-                    <!--yo chai card ho-->
-                    <div class="card" style="max-width: 18rem;">
-                        <img src="img/1707897199579.jpg" class="card-img-top" loading="eager" alt="man lageko topic afno">
-                        <div class="card-body">
-                            <h5 class="card-title">mero hajurbau</h5>
-                            <p class="card-text">A Geospatial Enthusiest and Student of Kathmandu University</p>
-                            <a href="#" class="btn btn-primary">herum nata</a>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-
-
-    </section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!--portofolio-->
-    <section id="portfolio">
-        <div class="container">
-            <div class="row">
-                <h2 class="title text-center w-100"><b>click on images i will show you Jadu ko demo.</b></h2>
-            </div>
-            <div class="row">
-
-
-                <div class="col-md-4">
-                    <div class="grid">
-
-                        <p><br><br>
-                        <h3 style="margin-bottom: -45px;">Click on the image to watch<br><b>twake prasad</b></h3>
-                        </p>
-                        <img src="img/1707897199623.jpg" loading="eager" alt="Terminaltetris">
-
-                        <div class="overlay">
-                            <div class="text">
-                                <div class="hari" style="margin-bottom: -30px;"><a
-                                        href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq"
-                                        class="terobau">jadu aba feri Click gara nata k herira</a></div>
-                                <a href="https://www.youtube.com/embed/wfOH_6dhzSA?si=dK7B-v6hJqJNP4YY"
-                                    target="_main"><img src="img/1707899002451.jpg" loading="eager" alt="Terminaltetris"></a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-
-                <div class="col-md-4">
-                    <div class="grid">
-
-                        <p><br><br>
-                       <h3 style="margin-bottom: -45px;">Click on the image to watch<br><b>Innocent Bachha</b></h3>
-                        </p>
-                        <img src="img/1707897199623.jpg" loading="eager" alt="Terminaltetris">
-
-                        <div class="overlay1">
-                            <div class="text">
-                                <div class="hari" style="margin-bottom: -30px;"><a
-                                        href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq"
-                                        class="terobau">jadu aba feri Click gara nata k herira</a></div>
-                                <a href="https://www.youtube.com/embed/56qg-V0ZAV4?si=3h5y4cqDz4weFQ8R"
-                                    target="_main"><img src="img/1756118328699.jpg" loading="eager" alt="Terminaltetris"></a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-                <div class="col-md-4">
-                    <div class="grid">
-
-                        <p><br><br>
-                        <h3 style="margin-bottom: -45px;">Click on the image to watch<br><b>CR7 fan</b></h3>
-                        </p>
-                        <img src="img/1707897199623.jpg" loading="eager" alt="Terminaltetris">
-
-                        <div class="overlay2">
-                            <div class="text">
-                                <div class="hari" style="margin-bottom: -30px;"><a
-                                        href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq"
-                                        class="terobau">jadu aba feri Click gara nata k herira</a></div>
-                                <a href="https://www.youtube.com/embed/OkKW4rFrY9s?si=KCsS-xjQJvsThWUz"
-                                    target="_main"><img src="img/1707899002432.jpg" loading="eager" alt="Terminaltetris"></a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-
-                <div class="col-md-4">
-                    <div class="grid">
-
-                        <p><br><br>
-                        <h3 style="margin-bottom: -45px;">Click on the image to watch<br><b>Plan B</b></h3>
-                        </p>
-                        <img src="img/1707897199623.jpg" loading="eager" alt="Terminaltetris">
-
-                        <div class="overlay3">
-                            <div class="text">
-                                <div class="hari" style="margin-bottom: -30px;"><a
-                                        href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq"
-                                        class="terobau">jadu aba feri Click gara nata k herira</a></div>
-                                <a href="https://www.youtube.com/embed/F5T2-u5WJH8?si=inAdvNKgU4pb43Xz"
-                                    target="_main"><img src="img/1717064830755.jpg" loading="eager" alt="Terminaltetris"></a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-
-                <div class="col-md-4">
-                    <div class="grid">
-
-                        <p><br><br>
-                        <h3 style="margin-bottom: -45px;">Click on the image to watch<br><b>k garya?</b></h3>
-                        </p>
-                        <img src="img/1707897199623.jpg" loading="eager" alt="Terminaltetris">
-
-                        <div class="overlay4">
-                            <div class="text">
-                                <div class="hari" style="margin-bottom: -30px;"><a
-                                        href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq"
-                                        class="terobau">jadu aba feri Click gara nata k herira</a></div>
-                                <a href="https://www.youtube.com/embed/f31XtQNuF0M?si=jpIT0I7iTcwUb0_R"
-                                    target="_main"><img src="img/1707899002413.jpg" loading="eager" alt="Terminaltetris"></a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-                <div class="col-md-4">
-                    <div class="grid">
-
-                        <p><br><br>
-                        <h3 style="margin-bottom: -45px;">Click on the image to watch<br><b>TA pagal ho?</b></h3>
-                        </p>
-                        <img src="img/1707897199623.jpg" loading="eager" alt="Terminaltetris">
-
-                        <div class="overlay5">
-                            <div class="text">
-                                <div class="hari" style="margin-bottom: -30px;"><a
-                                        href="https://www.youtube.com/embed/HcOc7P5BMi4?si=0Cl3otCp82hNRqYq"
-                                        class="terobau">jadu aba feri Click gara nata k herira</a></div>
-                                <a href="https://youtube.com/shorts/vU2FxwMFWLQ?si=SEpkRTMUGxKUmw5j"
-                                    target="_main"><img src="img/1707899002425.jpg" loading="eager" alt="Terminaltetris"></a>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            </div>
-        </div>
-    </section>
-
-
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <iframe width="560" height="415" src="https://www.youtube.com/embed/9tjdswqGGVg?si=HWcxz_vDOiBUypKk"
-            title="YouTube video player" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>>
-
-        <a href="https://www.youtube.com/embed/HcOc7P5BMi4?si=V7JNDDdoCBGm1YoB" target="_main"><img
-                src="img/1707897199579.jpg" height="200px"></a>
+  <!-- ══ LOADER ══ -->
+  <div id="loader">
+    <div class="loader-inner">
+      <div class="loader-compass">
+        <div class="compass-needle"></div>
+        <div class="compass-ring"></div>
+      </div>
+      <p class="loader-text">Mapping Your World<span class="dots">...</span></p>
+    </div>
+  </div>
+
+  <!-- ══ CURSOR ══ -->
+  <div id="cursor"></div>
+  <div id="cursor-trail"></div>
+
+  <!-- ══ NAVIGATION ══ -->
+  <nav id="navbar">
+    <div class="nav-logo">
+      <span class="logo-icon"><i class="fa-solid fa-compass-drafting"></i></span>
+      <span class="logo-text">Wanderlust</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#discover">Discover</a></li>
+      <li><a href="#map-section">Explore Map</a></li>
+      <li><a href="#categories">Categories</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+    <button class="nav-cta" onclick="scrollToMap()">
+      <i class="fa-solid fa-location-dot"></i> Near Me
+    </button>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ══ HERO SECTION ══ -->
+  <section id="hero">
+    <div class="hero-bg">
+      <div class="hero-mountains">
+        <svg viewBox="0 0 1440 600" preserveAspectRatio="none" class="mountain-svg layer-far">
+          <polygon points="0,600 200,200 400,350 600,150 800,300 1000,100 1200,280 1440,180 1440,600" fill="rgba(10,30,20,0.6)"/>
+        </svg>
+        <svg viewBox="0 0 1440 600" preserveAspectRatio="none" class="mountain-svg layer-mid">
+          <polygon points="0,600 150,320 350,430 550,250 750,380 950,220 1150,360 1350,240 1440,300 1440,600" fill="rgba(10,40,25,0.7)"/>
+        </svg>
+        <svg viewBox="0 0 1440 600" preserveAspectRatio="none" class="mountain-svg layer-near">
+          <polygon points="0,600 100,420 300,500 500,380 700,460 900,350 1100,440 1300,370 1440,410 1440,600" fill="rgba(8,25,15,0.85)"/>
+        </svg>
+      </div>
+      <div class="hero-stars" id="stars"></div>
+      <div class="hero-aurora"></div>
     </div>
 
+    <div class="hero-content">
+      <div class="hero-tag reveal-fade">✦ Real-Time GIS Tourism Explorer</div>
+      <h1 class="hero-title">
+        <span class="title-line reveal-up" style="animation-delay:0.2s">The World</span>
+        <span class="title-line italic reveal-up" style="animation-delay:0.4s">is Calling</span>
+      </h1>
+      <p class="hero-sub reveal-fade" style="animation-delay:0.6s">
+        Discover remarkable destinations hiding within 50 km of where you stand. Real places. Real adventures. Your story starts here.
+      </p>
+      <div class="hero-actions reveal-fade" style="animation-delay:0.8s">
+        <button class="btn-primary" onclick="initNearMe()">
+          <i class="fa-solid fa-location-crosshairs"></i>
+          Explore Near Me
+        </button>
+        <button class="btn-ghost" onclick="document.getElementById('discover').scrollIntoView({behavior:'smooth'})">
+          Browse Destinations <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+      <div class="hero-stats reveal-fade" style="animation-delay:1s">
+        <div class="stat"><span class="stat-num" data-count="50">0</span><span>km</span><p>Radius Search</p></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-num" data-count="8">0</span><span>M+</span><p>POIs Worldwide</p></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-num" data-count="195">0</span><span></span><p>Countries</p></div>
+      </div>
+    </div>
 
+    <div class="hero-scroll-hint">
+      <span>Scroll to Explore</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
 
+  <!-- ══ CATEGORIES STRIP ══ -->
+  <section id="categories">
+    <div class="categories-scroll">
+      <div class="cat-item active" data-cat="all" onclick="filterByCategory('all',this)">
+        <i class="fa-solid fa-globe"></i><span>All Places</span>
+      </div>
+      <div class="cat-item" data-cat="tourism" onclick="filterByCategory('tourism',this)">
+        <i class="fa-solid fa-camera-retro"></i><span>Attractions</span>
+      </div>
+      <div class="cat-item" data-cat="natural" onclick="filterByCategory('natural',this)">
+        <i class="fa-solid fa-mountain-sun"></i><span>Nature</span>
+      </div>
+      <div class="cat-item" data-cat="historic" onclick="filterByCategory('historic',this)">
+        <i class="fa-solid fa-landmark"></i><span>Heritage</span>
+      </div>
+      <div class="cat-item" data-cat="leisure" onclick="filterByCategory('leisure',this)">
+        <i class="fa-solid fa-leaf"></i><span>Parks</span>
+      </div>
+      <div class="cat-item" data-cat="viewpoint" onclick="filterByCategory('viewpoint',this)">
+        <i class="fa-solid fa-binoculars"></i><span>Viewpoints</span>
+      </div>
+      <div class="cat-item" data-cat="amenity" onclick="filterByCategory('amenity',this)">
+        <i class="fa-solid fa-mug-hot"></i><span>Culture</span>
+      </div>
+    </div>
+  </section>
 
-
-
-    <!-- contact
-    <section id="contact" style="margin-bottom: 20px;">
-        <div class="d-flex justify-content-start">
-            <iframe
-                src="https://docs.google.com/forms/d/e/1FAIpQLSekzrewpKMkLqwDjFI7zG1-xlLF44Z6hbDuBKNRlp4g-LzGKg/viewform?embedded=true"
-                width="640" height="250" frameborder="0" marginheight="0" marginwidth="0">loading...</iframe>
+  <!-- ══ FEATURED DISCOVER SECTION ══ -->
+  <section id="discover">
+    <div class="section-header">
+      <div class="section-tag">✦ CURATED PICKS</div>
+      <h2>Iconic Destinations</h2>
+      <p>Handpicked wonders from around the globe to ignite your wanderlust</p>
+    </div>
+    <div class="featured-grid">
+      <div class="feat-card large reveal-card">
+        <div class="feat-img" style="background: linear-gradient(135deg,#1a3a2a,#0d2015); position:relative; overflow:hidden;">
+          <div class="feat-scene mountains-scene"></div>
         </div>
-    </section>  -->
+        <div class="feat-body">
+          <div class="feat-tag">Nepal · Himalayas</div>
+          <h3>Everest Base Camp</h3>
+          <p>Trek through ancient Sherpa villages to the foot of the world's highest peak at 5,364m.</p>
+          <div class="feat-meta">
+            <span><i class="fa-solid fa-star"></i> 4.9</span>
+            <span><i class="fa-solid fa-mountain"></i> 5,364m</span>
+            <span><i class="fa-solid fa-clock"></i> 14 days</span>
+          </div>
+        </div>
+      </div>
 
+      <div class="feat-card reveal-card" style="animation-delay:0.1s">
+        <div class="feat-img" style="background:linear-gradient(135deg,#1a2a3a,#0d1520);">
+          <div class="feat-scene ocean-scene"></div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-tag">Maldives · Indian Ocean</div>
+          <h3>Bioluminescent Lagoons</h3>
+          <p>Where the sea glows blue at night with nature's own light show.</p>
+          <div class="feat-meta">
+            <span><i class="fa-solid fa-star"></i> 5.0</span>
+            <span><i class="fa-solid fa-water"></i> Tropical</span>
+          </div>
+        </div>
+      </div>
 
+      <div class="feat-card reveal-card" style="animation-delay:0.2s">
+        <div class="feat-img" style="background:linear-gradient(135deg,#2a1a0d,#1a0d05);">
+          <div class="feat-scene desert-scene"></div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-tag">Jordan · Middle East</div>
+          <h3>Wadi Rum Desert</h3>
+          <p>A vast red sandstone wilderness. Sleep under a billion stars.</p>
+          <div class="feat-meta">
+            <span><i class="fa-solid fa-star"></i> 4.8</span>
+            <span><i class="fa-solid fa-sun"></i> Arid</span>
+          </div>
+        </div>
+      </div>
 
+      <div class="feat-card reveal-card" style="animation-delay:0.3s">
+        <div class="feat-img" style="background:linear-gradient(135deg,#1a1a3a,#0d0d20);">
+          <div class="feat-scene aurora-scene"></div>
+        </div>
+        <div class="feat-body">
+          <div class="feat-tag">Iceland · Arctic</div>
+          <h3>Northern Lights</h3>
+          <p>Chase the aurora borealis across lava fields and frozen waterfalls.</p>
+          <div class="feat-meta">
+            <span><i class="fa-solid fa-star"></i> 4.9</span>
+            <span><i class="fa-solid fa-snowflake"></i> Arctic</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- ══ MAP SECTION ══ -->
+  <section id="map-section">
+    <div class="map-header">
+      <div class="section-tag">✦ LIVE GIS EXPLORER</div>
+      <h2>Discover Places Near You</h2>
+      <p>Real tourism data from OpenStreetMap — updated in real time</p>
+    </div>
 
+    <div class="map-controls">
+      <div class="radius-control">
+        <label><i class="fa-solid fa-circle-dot"></i> Search Radius</label>
+        <div class="radius-slider-wrap">
+          <input type="range" id="radiusSlider" min="5" max="100" value="50" step="5"/>
+          <span id="radiusVal">50 km</span>
+        </div>
+      </div>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search by name or type…"/>
+      </div>
+      <button class="locate-btn" id="locateBtn" onclick="initNearMe()">
+        <i class="fa-solid fa-location-crosshairs"></i>
+        <span>Locate Me</span>
+      </button>
+    </div>
 
+    <div class="map-layout">
+      <!-- Map -->
+      <div id="map"></div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <!--footer-->
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-5">
-
-                    <ul>
-
-
-                        <section id="contact" style="margin-bottom: 20px;">
-                            <div class="d-flex justify-content-start">
-                                <iframe
-                                    src="https://docs.google.com/forms/d/e/1FAIpQLSekzrewpKMkLqwDjFI7zG1-xlLF44Z6hbDuBKNRlp4g-LzGKg/viewform?embedded=true"
-                                    width="100%" height="80" frameborder="0" marginheight="0"
-                                    marginwidth="0">loading...</iframe>
-                            </div>
-                        </section>
-
-
-                        <li class="pus"><strong>Email:</strong>manage19114@gmail.com</li>
-                        <li class="pus"><strong>Phone:</strong>+977 9749404937</li>
-                    </ul>
-
-
-                </div>
-                <div class="col-md-2">
-                    <a href="#home" class="back-to-top"><i class="fa fa-arrow-circle-up fa-3x"></i></a>
-                </div>
-                <div class="col-md-5">
-                    <ul id="social">
-                        <p class="push">Click on icons to Know more about me!</p>
-                        <li><a href="https://www.instagram.com/maestro_19114" target="_blank"><i
-                                    class="fa fa-instagram"></i></a>
-                        </li>
-                        <li><a href="https://www.facebook.com/sugamspace" target="_blank"><i
-                                    class="fa fa-facebook-square"></i></a>
-                        </li>
-                        <li><a href="https://www.youtube.com" target="_blank"><i class="fa fa-youtube"></i></a></li>
-                        <li><a href="https://medium.com/@sugamkrishna" target="_blank"><i class="fa fa-pencil"></i></a>
-                        </li>
-                        <li><a href="https://www.instagram.com/maestro_19114" target="_blank"><i
-                                    class="fa fa-linkedin"></i></a>
-                        </li>
-                        <li><a href="https://github.com/maestro1911" target="_blank"><i class="fa fa-github"></i></a>
-                        </li>
-                        <li><a href="https://www.x.com" target="_blank"><i class="fa fa-twitter"></i></a></li>
-                    </ul>
-                </div>
+      <!-- Sidebar -->
+      <div class="map-sidebar">
+        <div class="sidebar-header">
+          <h3 id="result-count">Ready to Explore</h3>
+          <p id="result-sub">Click "Locate Me" to find attractions near you</p>
+        </div>
+        <div id="place-list" class="place-list">
+          <div class="placeholder-state">
+            <div class="placeholder-icon">
+              <i class="fa-solid fa-compass"></i>
             </div>
+            <p>Your nearby destinations will appear here</p>
+          </div>
         </div>
+      </div>
+    </div>
 
-        </div>
-    </footer>
+    <!-- Loading overlay -->
+    <div id="map-loading" class="map-loading hidden">
+      <div class="map-loading-inner">
+        <div class="map-spinner"></div>
+        <p>Scanning <span id="scan-radius">50</span>km radius for destinations…</p>
+      </div>
+    </div>
+  </section>
 
+  <!-- ══ HOW IT WORKS ══ -->
+  <section id="about">
+    <div class="section-header light">
+      <div class="section-tag">✦ HOW IT WORKS</div>
+      <h2>Your Journey in 3 Steps</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step reveal-card">
+        <div class="step-num">01</div>
+        <div class="step-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+        <h4>Share Location</h4>
+        <p>Allow browser access to your GPS coordinates. All processing happens locally — your data stays private.</p>
+      </div>
+      <div class="step reveal-card" style="animation-delay:0.15s">
+        <div class="step-num">02</div>
+        <div class="step-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+        <h4>Live Data Fetch</h4>
+        <p>We query OpenStreetMap's Overpass API for real tourism spots, viewpoints, heritage sites & nature within your chosen radius.</p>
+      </div>
+      <div class="step reveal-card" style="animation-delay:0.3s">
+        <div class="step-num">03</div>
+        <div class="step-icon"><i class="fa-solid fa-map-pin"></i></div>
+        <h4>Explore & Discover</h4>
+        <p>Browse interactive markers on the map. Hover for details, click for full info. Filter by category and find your next adventure.</p>
+      </div>
+    </div>
+  </section>
 
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon"><i class="fa-solid fa-compass-drafting"></i></span>
+        <span class="logo-text">Wanderlust</span>
+        <p>A WebGIS Tourism Explorer<br>Built with Leaflet · OpenStreetMap · Overpass API</p>
+      </div>
+      <div class="footer-links">
+        <h5>Data Sources</h5>
+        <a href="https://www.openstreetmap.org" target="_blank">OpenStreetMap</a>
+        <a href="https://overpass-api.de" target="_blank">Overpass API</a>
+        <a href="https://leafletjs.com" target="_blank">Leaflet.js</a>
+      </div>
+      <div class="footer-links">
+        <h5>Technology</h5>
+        <a href="#">HTML5 Geolocation</a>
+        <a href="#">CSS Animations</a>
+        <a href="#">Vanilla JavaScript</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Wanderlust Tourism Explorer · WebGIS Project · Map data © OpenStreetMap contributors</p>
+    </div>
+  </footer>
 
-
-
-
-
-
-
-
-
-
-
-
-    <!-- app.js library particles lai ho-->
-    <script type="text/javascript" src="js/jquery-3.1.1.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/smooth-scroll.js"></script>
-    <script type="text/javascript" src="js/wow.js"></script>
-    <script type="text/javascript" src="js/particles.js"></script>
-    <script type="text/javascript" src="js/wow.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
