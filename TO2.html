@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wanderlust Nepal — Discover the Himalayas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Barlow+Condensed:wght@300;400;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="css/TO2.css"/>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="loader-content">
+      <svg class="loader-mountain" viewBox="0 0 220 130">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#E8854A"/>
+            <stop offset="100%" stop-color="#C4552A"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 120 L75 20 L105 58 L140 8 L210 120 Z" stroke="url(#lg1)" stroke-width="2.5" fill="rgba(232,133,74,0.08)" stroke-dasharray="600" stroke-dashoffset="600">
+          <animate attributeName="stroke-dashoffset" from="600" to="0" dur="1.4s" ease="ease-out" fill="freeze"/>
+        </path>
+        <polygon points="75,20 85,20 80,8" fill="white" opacity="0">
+          <animate attributeName="opacity" from="0" to="0.9" begin="1.1s" dur="0.4s" fill="freeze"/>
+        </polygon>
+        <polygon points="140,8 150,8 145,-4" fill="white" opacity="0">
+          <animate attributeName="opacity" from="0" to="0.95" begin="1.2s" dur="0.4s" fill="freeze"/>
+        </polygon>
+      </svg>
+      <p class="loader-label">Namaste <span>🙏</span></p>
+    </div>
+  </div>
+
+  <!-- CUSTOM CURSOR -->
+  <div id="cursor"></div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar">
+    <a class="nav-logo" href="#hero">
+      <i class="fa-solid fa-mountain-sun"></i>
+      <span>Wanderlust<b>Nepal</b></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#nepal-tours">Nepal Tours</a></li>
+      <li><a href="#map-section">Explore Map</a></li>
+      <li><a href="#how">How It Works</a></li>
+    </ul>
+    <button class="nav-cta" onclick="initNearMe()">
+      <i class="fa-solid fa-location-crosshairs"></i> Near Me
+    </button>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section id="hero">
+    <!-- Sky & atmosphere -->
+    <div class="hero-sky"></div>
+    <div class="hero-clouds">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+      <div class="cloud c4"></div>
+    </div>
+    <!-- Animated sun -->
+    <div class="hero-sun">
+      <div class="sun-body"></div>
+      <div class="sun-glow g1"></div>
+      <div class="sun-glow g2"></div>
+      <div class="sun-rays" id="sunRays"></div>
+    </div>
+    <!-- Layered mountains -->
+    <div class="hero-mountains">
+      <svg class="mtn-layer far" viewBox="0 0 1440 500" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gmf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#C8DCE8"/><stop offset="100%" stop-color="#E8F4FA"/>
+          </linearGradient>
+        </defs>
+        <polygon points="0,500 0,310 130,120 260,230 410,70 570,190 740,40 900,170 1060,80 1220,200 1380,110 1440,160 1440,500" fill="url(#gmf)"/>
+        <polygon points="130,120 140,120 135,100" fill="white" opacity="0.95"/>
+        <polygon points="410,70 422,70 416,48" fill="white" opacity="0.98"/>
+        <polygon points="740,40 754,40 747,15" fill="white" opacity="1"/>
+        <polygon points="1060,80 1072,80 1066,58" fill="white" opacity="0.9"/>
+      </svg>
+      <svg class="mtn-layer mid" viewBox="0 0 1440 500" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gmm" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7BA8C0"/><stop offset="100%" stop-color="#B8D4E4"/>
+          </linearGradient>
+        </defs>
+        <polygon points="0,500 0,380 90,270 230,340 380,210 530,300 690,180 840,280 1000,200 1160,300 1320,230 1440,270 1440,500" fill="url(#gmm)"/>
+      </svg>
+      <svg class="mtn-layer near" viewBox="0 0 1440 500" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gmn" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#3D7A5F"/><stop offset="100%" stop-color="#72A888"/>
+          </linearGradient>
+        </defs>
+        <polygon points="0,500 0,440 70,360 180,420 320,320 480,400 640,300 800,390 960,330 1120,410 1280,350 1440,390 1440,500" fill="url(#gmn)"/>
+      </svg>
+      <!-- Ground -->
+      <div class="hero-ground"></div>
+    </div>
+    <!-- Flying birds -->
+    <div id="birds"></div>
+
+    <!-- CONTENT -->
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-line"></span>
+        Nepal's Premier Travel Guide
+        <span class="eyebrow-line"></span>
+      </div>
+      <h1 class="hero-h1">
+        <span class="line1">Where Mountains</span>
+        <span class="line2"><em>Touch the Sky</em></span>
+      </h1>
+      <p class="hero-para">
+        From Pokhara's shimmering lakes to Mustang's ancient canyons —
+        discover real destinations, real distances, your next great journey.
+      </p>
+      <div class="hero-btns">
+        <button class="btn-saffron" onclick="document.getElementById('nepal-tours').scrollIntoView({behavior:'smooth'})">
+          Explore Nepal &nbsp;<i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <button class="btn-ghost" onclick="initNearMe()">
+          <i class="fa-solid fa-crosshairs"></i>&nbsp; Near Me
+        </button>
+      </div>
+      <div class="hero-facts">
+        <div class="fact"><span>8</span><p>of 14 highest peaks on Earth</p></div>
+        <div class="fact-sep"></div>
+        <div class="fact"><span>3</span><p>UNESCO Heritage regions</p></div>
+        <div class="fact-sep"></div>
+        <div class="fact"><span>70+</span><p>trekking routes</p></div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <div class="scroll-mouse"><div class="scroll-dot"></div></div>
+      <span>Scroll to explore</span>
+    </div>
+  </section>
+
+  <!-- CATEGORY BAR -->
+  <div id="categories">
+    <div class="cats-wrap">
+      <div class="cat-item active" data-cat="all" onclick="filterByCategory('all',this)"><i class="fa-solid fa-globe"></i> All Places</div>
+      <div class="cat-item" data-cat="tourism" onclick="filterByCategory('tourism',this)"><i class="fa-solid fa-camera-retro"></i> Attractions</div>
+      <div class="cat-item" data-cat="natural" onclick="filterByCategory('natural',this)"><i class="fa-solid fa-mountain-sun"></i> Nature</div>
+      <div class="cat-item" data-cat="historic" onclick="filterByCategory('historic',this)"><i class="fa-solid fa-landmark"></i> Heritage</div>
+      <div class="cat-item" data-cat="leisure" onclick="filterByCategory('leisure',this)"><i class="fa-solid fa-leaf"></i> Parks</div>
+      <div class="cat-item" data-cat="viewpoint" onclick="filterByCategory('viewpoint',this)"><i class="fa-solid fa-binoculars"></i> Viewpoints</div>
+    </div>
+  </div>
+
+  <!-- ══ NEPAL LONG TOURS ══ -->
+  <section id="nepal-tours">
+    <div class="tours-bg-deco"></div>
+    <div class="tours-header">
+      <div class="section-eyebrow">Long Tour Destinations</div>
+      <h2 class="section-title">Top Places to Visit<br><em>Across Nepal</em></h2>
+      <p class="section-desc">Planning a longer journey? These iconic destinations deserve your time. Click any card for full details, distance info, and travel tips.</p>
+    </div>
+
+    <div class="tours-grid">
+
+      <div class="tcard" data-tilt onclick="openDestModal('pokhara')">
+        <div class="tcard-gfx pokhara">
+          <div class="tcard-overlay"></div>
+          <div class="tcard-badge">Most Visited</div>
+          <div class="tcard-flag">🇳🇵</div>
+          <div class="tcard-dist"><i class="fa-solid fa-route"></i> 200 km from Kathmandu</div>
+          <div class="tcard-gfx-emoji">🏔️</div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Gandaki Province</div>
+          <h3 class="tcard-name">Pokhara</h3>
+          <p class="tcard-desc">Nepal's lakeside gem where Phewa Lake mirrors the Annapurna range. Gateway to the world's best trekking routes with paragliders dotting the sky.</p>
+          <div class="tcard-tags">
+            <span>🏔 Annapurna</span><span>🚣 Phewa Lake</span><span>🪂 Paragliding</span>
+          </div>
+          <div class="tcard-foot">
+            <span class="tcard-time"><i class="fa-regular fa-clock"></i> 5–7 days</span>
+            <span class="tcard-more">Details <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard featured" data-tilt onclick="openDestModal('mustang')">
+        <div class="tcard-gfx mustang">
+          <div class="tcard-overlay"></div>
+          <div class="tcard-badge restricted">Restricted Zone</div>
+          <div class="tcard-flag">🇳🇵</div>
+          <div class="tcard-dist"><i class="fa-solid fa-route"></i> 320 km from Kathmandu</div>
+          <div class="tcard-gfx-emoji">🏜️</div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Gandaki Province</div>
+          <h3 class="tcard-name">Mustang</h3>
+          <p class="tcard-desc">The "Last Forbidden Kingdom" — Tibetan-plateau canyons of crimson and ochre, the walled city of Lo Manthang, and ancient cave monasteries carved into cliffs.</p>
+          <div class="tcard-tags">
+            <span>🏯 Lo Manthang</span><span>🗻 4,000m+</span><span>🛕 Monasteries</span>
+          </div>
+          <div class="tcard-foot">
+            <span class="tcard-time"><i class="fa-regular fa-clock"></i> 10–14 days</span>
+            <span class="tcard-more">Details <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard" data-tilt onclick="openDestModal('chitwan')">
+        <div class="tcard-gfx chitwan">
+          <div class="tcard-overlay"></div>
+          <div class="tcard-badge">UNESCO Site</div>
+          <div class="tcard-flag">🇳🇵</div>
+          <div class="tcard-dist"><i class="fa-solid fa-route"></i> 150 km from Kathmandu</div>
+          <div class="tcard-gfx-emoji">🦏</div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Bagmati Province</div>
+          <h3 class="tcard-name">Chitwan</h3>
+          <p class="tcard-desc">One-horned rhinos, Bengal tigers, wild elephants and the UNESCO jungle. Canoe the Rapti River at dawn — silence broken only by bird calls.</p>
+          <div class="tcard-tags">
+            <span>🦏 Rhino Safari</span><span>🐯 Tiger Reserve</span><span>🛶 Canoeing</span>
+          </div>
+          <div class="tcard-foot">
+            <span class="tcard-time"><i class="fa-regular fa-clock"></i> 3–4 days</span>
+            <span class="tcard-more">Details <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard" data-tilt onclick="openDestModal('lumbini')">
+        <div class="tcard-gfx lumbini">
+          <div class="tcard-overlay"></div>
+          <div class="tcard-badge sacred">Sacred Site</div>
+          <div class="tcard-flag">🇳🇵</div>
+          <div class="tcard-dist"><i class="fa-solid fa-route"></i> 280 km from Kathmandu</div>
+          <div class="tcard-gfx-emoji">🕌</div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Lumbini Province</div>
+          <h3 class="tcard-name">Lumbini</h3>
+          <p class="tcard-desc">Birthplace of the Buddha. A UNESCO pilgrimage site with monasteries built by 40 nations surrounding the sacred Mayadevi Temple and Ashoka Pillar.</p>
+          <div class="tcard-tags">
+            <span>🕌 Mayadevi Temple</span><span>🏛 Ashoka Pillar</span><span>🧘 Peace Pagoda</span>
+          </div>
+          <div class="tcard-foot">
+            <span class="tcard-time"><i class="fa-regular fa-clock"></i> 2–3 days</span>
+            <span class="tcard-more">Details <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard" data-tilt onclick="openDestModal('rara')">
+        <div class="tcard-gfx rara">
+          <div class="tcard-overlay"></div>
+          <div class="tcard-badge gem">Hidden Gem</div>
+          <div class="tcard-flag">🇳🇵</div>
+          <div class="tcard-dist"><i class="fa-solid fa-route"></i> 480 km from Kathmandu</div>
+          <div class="tcard-gfx-emoji">💧</div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Karnali Province</div>
+          <h3 class="tcard-name">Rara Lake</h3>
+          <p class="tcard-desc">Nepal's largest lake shimmers at 3,000m between pine-forested peaks. Crystal blue, virtually untouched, with skies dark enough to count every star.</p>
+          <div class="tcard-tags">
+            <span>💧 Deepest Lake</span><span>🦅 Wildlife</span><span>🌲 Pine Forest</span>
+          </div>
+          <div class="tcard-foot">
+            <span class="tcard-time"><i class="fa-regular fa-clock"></i> 7–10 days</span>
+            <span class="tcard-more">Details <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tcard" data-tilt onclick="openDestModal('bandipur')">
+        <div class="tcard-gfx bandipur">
+          <div class="tcard-overlay"></div>
+          <div class="tcard-badge heritage">Heritage Town</div>
+          <div class="tcard-flag">🇳🇵</div>
+          <div class="tcard-dist"><i class="fa-solid fa-route"></i> 140 km from Kathmandu</div>
+          <div class="tcard-gfx-emoji">⛩️</div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Gandaki Province</div>
+          <h3 class="tcard-name">Bandipur</h3>
+          <p class="tcard-desc">A perfectly preserved Newari hilltop town frozen in the 1800s. Stone bazaars, pagoda temples, and a panorama of the entire Himalayan horizon.</p>
+          <div class="tcard-tags">
+            <span>🏘 Newari Culture</span><span>⛩ Temples</span><span>🌄 Panorama</span>
+          </div>
+          <div class="tcard-foot">
+            <span class="tcard-time"><i class="fa-regular fa-clock"></i> 1–2 days</span>
+            <span class="tcard-more">Details <i class="fa-solid fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Distance ribbon -->
+    <div class="dist-ribbon">
+      <div class="dist-item"><b>200<small>km</small></b><span>→ Pokhara</span></div>
+      <div class="dist-div"></div>
+      <div class="dist-item"><b>320<small>km</small></b><span>→ Mustang</span></div>
+      <div class="dist-div"></div>
+      <div class="dist-item"><b>150<small>km</small></b><span>→ Chitwan</span></div>
+      <div class="dist-div"></div>
+      <div class="dist-item"><b>480<small>km</small></b><span>→ Rara Lake</span></div>
+    </div>
+  </section>
+
+  <!-- ══ MAP SECTION ══ -->
+  <section id="map-section">
+    <div class="map-section-inner">
+      <div class="map-section-header">
+        <div class="section-eyebrow light">Live GIS Explorer</div>
+        <h2 class="section-title light">Discover Places<br><em>Near You Right Now</em></h2>
+        <p class="section-desc light">Real data from OpenStreetMap. Share your location, set a radius, explore every pin.</p>
+      </div>
+      <div class="map-controls-bar">
+        <div class="ctrl-item">
+          <label><i class="fa-solid fa-circle-dot"></i> Radius</label>
+          <div class="slider-row">
+            <input type="range" id="radiusSlider" min="5" max="100" value="50" step="5"/>
+            <span id="radiusVal">50 km</span>
+          </div>
+        </div>
+        <div class="search-field">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" placeholder="Search places by name…"/>
+        </div>
+        <button class="locate-btn" id="locateBtn" onclick="initNearMe()">
+          <i class="fa-solid fa-location-crosshairs"></i> Locate Me
+        </button>
+      </div>
+      <div class="map-layout">
+        <div id="map"></div>
+        <div class="sidebar">
+          <div class="sidebar-head">
+            <h3 id="result-count">Ready to Explore</h3>
+            <p id="result-sub">Press Locate Me to start</p>
+          </div>
+          <div id="place-list">
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fa-solid fa-compass"></i></div>
+              <p>Your nearby destinations<br>will appear here</p>
+            </div>
+          </div>
+        </div>
+        <div id="map-loading" class="map-loading hidden">
+          <div class="map-loading-box">
+            <div class="map-spinner"></div>
+            <p>Scanning <span id="scan-radius">50</span> km…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ HOW IT WORKS ══ -->
+  <section id="how">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">Three Steps to<br><em>Your Adventure</em></h2>
+    <div class="how-steps">
+      <div class="how-card reveal-card">
+        <div class="how-num">01</div>
+        <div class="how-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+        <h4>Share Location</h4>
+        <p>Allow browser GPS access. Your data stays on-device — never stored or sent to any server.</p>
+      </div>
+      <div class="how-connector"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="how-card reveal-card" style="transition-delay:0.15s">
+        <div class="how-num">02</div>
+        <div class="how-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+        <h4>Live Data Loads</h4>
+        <p>We query OpenStreetMap's Overpass API for real tourism spots, viewpoints, temples and nature.</p>
+      </div>
+      <div class="how-connector"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="how-card reveal-card" style="transition-delay:0.3s">
+        <div class="how-num">03</div>
+        <div class="how-icon"><i class="fa-solid fa-map-pin"></i></div>
+        <h4>Explore & Go</h4>
+        <p>Click any map pin for details. Filter by category. Tap a card to fly the map straight to it.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo"><i class="fa-solid fa-mountain-sun"></i> Wanderlust Nepal</div>
+        <p>A WebGIS Tourism Explorer — built with Leaflet.js, OpenStreetMap & the Overpass API.</p>
+        <p class="foot-credit">Map data © <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a> contributors</p>
+      </div>
+      <div class="footer-col">
+        <h5>Data Sources</h5>
+        <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>
+        <a href="https://overpass-api.de" target="_blank">Overpass API</a>
+        <a href="https://leafletjs.com" target="_blank">Leaflet.js</a>
+      </div>
+      <div class="footer-col">
+        <h5>Nepal Tourism</h5>
+        <a href="https://welcomenepal.com" target="_blank">Welcome Nepal</a>
+        <a href="https://ntb.gov.np" target="_blank">Nepal Tourism Board</a>
+        <a href="https://en.wikipedia.org/wiki/Tourism_in_Nepal" target="_blank">Nepal Travel Wiki</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>© 2025 Wanderlust Nepal · WebGIS Student Project</p>
+    </div>
+  </footer>
+
+  <!-- DESTINATION MODAL -->
+  <div id="dest-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeDestModal()"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/T2.js"></script>
+</body>
+</html>
