@@ -198,19 +198,22 @@ async function fetchPlaces({ lat, lng }, km) {
 
   // 1. Try the Flask backend (/api/nearby)
   try {
-    const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}&radius_km=${km}`, { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}&radius_km=${km}`, { signal: AbortSignal.timeout(2000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (data.places && data.places.length >= 0) {
+      if (data.cached) toast('Loaded from cache ⚡', 'success', 'fa-bolt');
       processPlaces(data.places);
       return;
     }
   } catch (_) {
-    // Backend unreachable (e.g. opened via Live Server) — fall through to Overpass
+    // Backend unreachable — fall through to direct Overpass mode
   }
 
   // 2. Fallback: call Overpass directly from the browser
-  toast('Using direct mode…', 'info', 'fa-satellite-dish');
+  // This happens when Flask isn't running (e.g. opened via Live Server).
+  // Tip: run `python TO3.py` and open localhost:5000 for faster backend mode.
+  toast('Querying Overpass directly…', 'info', 'fa-satellite-dish');
   const r = km * 1000;
   const q = `[out:json][timeout:30];(
     node["tourism"](around:${r},${lat},${lng});
@@ -222,7 +225,15 @@ async function fetchPlaces({ lat, lng }, km) {
   );out center body 200;`;
 
   try {
-    const res  = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(q) });
+    // Race two Overpass mirrors — whichever answers first wins
+    const MIRRORS = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+    ];
+    const body = 'data=' + encodeURIComponent(q);
+    const res = await Promise.any(
+      MIRRORS.map(url => fetch(url, { method:'POST', body, signal: AbortSignal.timeout(28000) }))
+    );
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     processRawOverpass(data.elements, { lat, lng }, km);
