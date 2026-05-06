@@ -8,31 +8,8 @@ import math
 import urllib.parse
 import urllib.request
 import json
-import time
-import threading
 
 app = Flask(__name__)
-
-# ── NEARBY RESULTS CACHE ──────────────────────────────────────────────────────
-# Keyed by (lat_rounded, lng_rounded, radius_km). TTL = 10 minutes.
-# Avoids hitting Overpass again for the same area within a session.
-_nearby_cache: dict = {}
-_cache_ttl = 600  # seconds
-
-def _cache_key(lat, lng, radius_km):
-    # Round to 2 decimal places (~1 km grid) so nearby searches reuse cache
-    return (round(lat, 2), round(lng, 2), int(radius_km))
-
-def _cache_get(key):
-    entry = _nearby_cache.get(key)
-    if entry and (time.time() - entry["ts"]) < _cache_ttl:
-        return entry["data"]
-    return None
-
-def _cache_set(key, data):
-    _nearby_cache[key] = {"ts": time.time(), "data": data}
-
-
 
 # ── DESTINATION DATA ───────────────────────────────────────────────────────────
 # (Moved from DEST constant in TO3.js)
@@ -362,128 +339,202 @@ def api_destination(key):
 @app.route("/api/nearby")
 def api_nearby():
     """
-    Server-side Overpass proxy with two speed improvements:
-    1. In-memory cache — repeat searches of the same area return in <5 ms.
-    2. Parallel mirror race — queries two Overpass mirrors simultaneously;
-       whichever responds first wins, cutting median wait time roughly in half.
+    Fast notable-places search.
+
+    Strategy (both run in parallel, results merged):
+    A) Wikipedia Geosearch API  — ~300 ms, returns only places famous enough
+       to have a Wikipedia article, with descriptions + thumbnails built in.
+       Radius capped at 10 km (API limit); for larger radii we run multiple
+       tile calls.
+    B) Overpass (strict filter)  — only tourism=attraction + wikipedia-tagged
+       nodes. Query is tiny so it finishes in 2-5 s instead of 10-20 s.
+
+    Results are deduplicated by name, sorted by distance, cached 10 min.
     """
     try:
         lat       = float(request.args["lat"])
         lng       = float(request.args["lng"])
         radius_km = float(request.args.get("radius_km", 50))
-        limit     = int(request.args.get("limit", 150))
+        limit     = int(request.args.get("limit", 30))
     except (KeyError, ValueError) as exc:
         return jsonify({"error": f"Bad parameters: {exc}"}), 400
 
-    # ── Cache check ──────────────────────────────────────────────────────────
     ckey   = _cache_key(lat, lng, radius_km)
     cached = _cache_get(ckey)
     if cached:
-        sliced = cached[:limit]
-        return jsonify({"count": len(sliced), "places": sliced, "cached": True})
+        return jsonify({"count": len(cached), "places": cached, "cached": True})
 
-    # ── Build Overpass query ─────────────────────────────────────────────────
-    radius_m = int(radius_km * 1000)
-    overpass_query = f"""[out:json][timeout:25];(
-  node["tourism"](around:{radius_m},{lat},{lng});
-  node["historic"](around:{radius_m},{lat},{lng});
-  node["natural"~"peak|waterfall|cave|beach|hot_spring|volcano|viewpoint|glacier"](around:{radius_m},{lat},{lng});
-  node["leisure"~"park|nature_reserve|garden"](around:{radius_m},{lat},{lng});
-  node["amenity"~"place_of_worship|museum|arts_centre|theatre"](around:{radius_m},{lat},{lng});
-  way["tourism"~"attraction|museum|viewpoint|zoo|gallery"](around:{radius_m},{lat},{lng});
-);out center body 200;"""
+    results_a, results_b = [], []
 
-    payload = ("data=" + urllib.parse.quote(overpass_query)).encode()
+    # ── helper: safe HTTP GET ────────────────────────────────────────────────
+    def wiki_get(url):
+        req = urllib.request.Request(
+            url, headers={"User-Agent": "WanderlustNepal/1.0 (educational)"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return json.loads(r.read().decode())
 
-    # ── Parallel mirror race ─────────────────────────────────────────────────
-    # Two well-maintained public Overpass mirrors. First to answer wins.
-    MIRRORS = [
-        "https://overpass-api.de/api/interpreter",
-        "https://overpass.kumi.systems/api/interpreter",
-    ]
-
-    result_holder = [None]   # shared across threads
-    error_holder  = [None]
-    lock          = threading.Lock()
-    done          = threading.Event()
-
-    def query_mirror(mirror_url):
+    # ── A: Wikipedia Geosearch ───────────────────────────────────────────────
+    def fetch_wiki_geo():
         try:
-            req = urllib.request.Request(mirror_url, data=payload, method="POST")
-            with urllib.request.urlopen(req, timeout=28) as resp:
-                data = json.loads(resp.read().decode())
-            with lock:
-                if not done.is_set():
-                    result_holder[0] = data
-                    done.set()
-        except Exception as exc:
-            with lock:
-                error_holder[0] = str(exc)
-                # Only set done if both threads have now failed
-                # (we check result_holder below)
+            # Wikipedia caps radius at 10 000 m; tile across the area if larger
+            tile_radius = min(int(radius_km * 1000), 10000)
+            # For large radii, sample a few offset tiles to widen coverage
+            offsets = [(0, 0)]
+            if radius_km > 15:
+                step = radius_km * 0.45 / 111   # degrees ≈ km/111
+                offsets += [(step, 0), (-step, 0), (0, step), (0, -step)]
 
-    threads = [threading.Thread(target=query_mirror, args=(m,), daemon=True)
-               for m in MIRRORS]
-    for t in threads:
-        t.start()
+            seen_ids = set()
+            for dlat, dlng in offsets:
+                coord  = f"{lat+dlat}|{lng+dlng}"
+                url    = (
+                    f"https://en.wikipedia.org/w/api.php"
+                    f"?action=query&generator=geosearch"
+                    f"&ggscoord={coord}&ggsradius={tile_radius}&ggslimit=20"
+                    f"&prop=pageimages|coordinates|extracts"
+                    f"&pithumbsize=500&exintro=1&exchars=500&format=json"
+                )
+                d = wiki_get(url)
+                pages = (d.get("query") or {}).get("pages", {})
+                for page in pages.values():
+                    pid = page.get("pageid")
+                    if pid in seen_ids:
+                        continue
+                    seen_ids.add(pid)
+                    coords = (page.get("coordinates") or [{}])[0]
+                    p_lat  = coords.get("lat")
+                    p_lng  = coords.get("lon")
+                    if not p_lat or not p_lng:
+                        continue
+                    dist = haversine(lat, lng, p_lat, p_lng)
+                    if dist > radius_km:
+                        continue
+                    title   = page.get("title", "")
+                    extract = (page.get("extract") or "").strip()
+                    img     = (page.get("thumbnail") or {}).get("source")
+                    wiki_url = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(title.replace(' ','_'))}"
+                    results_a.append({
+                        "id":           f"wiki_{pid}",
+                        "name":         title,
+                        "lat":          p_lat,
+                        "lng":          p_lng,
+                        "dist":         round(dist, 3),
+                        "type":         "attraction",
+                        "subtype":      "attraction",
+                        "icon":         "fa-star",
+                        "website":      None,
+                        "wiki":         wiki_url,
+                        "img":          img,
+                        "desc":         extract or f"A notable attraction near your location.",
+                        "opening_hours":None,
+                        "phone":        None,
+                        "fee":          None,
+                        "access":       None,
+                    })
+        except Exception:
+            pass
 
-    # Wait up to 30 s for the first mirror to respond
-    done.wait(timeout=30)
+    # ── B: Lean Overpass (famous-only filter) ────────────────────────────────
+    def fetch_overpass_notable():
+        try:
+            r_m   = int(radius_km * 1000)
+            query = f"""[out:json][timeout:12];(
+  node["tourism"="attraction"](around:{r_m},{lat},{lng});
+  node["tourism"="museum"](around:{r_m},{lat},{lng});
+  node["historic"]["wikipedia"](around:{r_m},{lat},{lng});
+  node["natural"~"peak|waterfall"]["wikipedia"](around:{r_m},{lat},{lng});
+  node["leisure"="nature_reserve"]["wikipedia"](around:{r_m},{lat},{lng});
+);out 40;"""
+            payload = ("data=" + urllib.parse.quote(query)).encode()
+            # Race two mirrors
+            winner = [None]
+            ev     = threading.Event()
+            def _try(url):
+                try:
+                    req = urllib.request.Request(url, data=payload, method="POST")
+                    with urllib.request.urlopen(req, timeout=14) as resp:
+                        d = json.loads(resp.read().decode())
+                    if not ev.is_set():
+                        winner[0] = d
+                        ev.set()
+                except Exception:
+                    pass
+            mirrors = [
+                "https://overpass-api.de/api/interpreter",
+                "https://overpass.kumi.systems/api/interpreter",
+            ]
+            ts = [threading.Thread(target=_try, args=(m,), daemon=True) for m in mirrors]
+            for t in ts: t.start()
+            ev.wait(timeout=15)
+            if not winner[0]:
+                return
+            for el in winner[0].get("elements", []):
+                p_lat = el.get("lat")
+                p_lng = el.get("lon")
+                if not p_lat or not p_lng:
+                    continue
+                tags = el.get("tags", {})
+                name = tags.get("name") or tags.get("name:en")
+                if not name:
+                    continue
+                dist = haversine(lat, lng, p_lat, p_lng)
+                if dist > radius_km:
+                    continue
+                cl   = classify_tags(tags)
+                wiki = build_wiki_url(tags.get("wikipedia", ""))
+                desc = (tags.get("description") or tags.get("description:en")
+                        or tags.get("note")
+                        or f"A {cl['subtype'] or cl['type']} near your location.")
+                results_b.append({
+                    "id":           el["id"],
+                    "name":         name,
+                    "lat":          p_lat,
+                    "lng":          p_lng,
+                    "dist":         round(dist, 3),
+                    "type":         cl["type"],
+                    "subtype":      cl["subtype"],
+                    "icon":         cl["icon"],
+                    "website":      tags.get("website") or tags.get("contact:website"),
+                    "wiki":         wiki,
+                    "img":          None,
+                    "desc":         desc,
+                    "opening_hours":tags.get("opening_hours"),
+                    "phone":        tags.get("phone") or tags.get("contact:phone"),
+                    "fee":          tags.get("fee"),
+                    "access":       tags.get("access"),
+                })
+        except Exception:
+            pass
 
-    if result_holder[0] is None:
-        return jsonify({"error": "All Overpass mirrors failed or timed out"}), 502
+    # ── Run A and B in parallel ──────────────────────────────────────────────
+    ta = threading.Thread(target=fetch_wiki_geo,       daemon=True)
+    tb = threading.Thread(target=fetch_overpass_notable, daemon=True)
+    ta.start(); tb.start()
+    ta.join(timeout=12)
+    tb.join(timeout=16)
 
-    raw = result_holder[0]
+    # ── Merge & deduplicate by name ──────────────────────────────────────────
+    seen_names = set()
+    merged = []
+    # Wikipedia results first (they have better data)
+    for p in sorted(results_a, key=lambda x: x["dist"]):
+        key = p["name"].lower().strip()
+        if key not in seen_names:
+            seen_names.add(key)
+            merged.append(p)
+    # Overpass fills in places Wikipedia missed
+    for p in sorted(results_b, key=lambda x: x["dist"]):
+        key = p["name"].lower().strip()
+        if key not in seen_names:
+            seen_names.add(key)
+            merged.append(p)
 
-    # ── Parse elements ───────────────────────────────────────────────────────
-    places = []
-    for el in raw.get("elements", []):
-        p_lat = el.get("lat") or (el.get("center") or {}).get("lat")
-        p_lng = el.get("lon") or (el.get("center") or {}).get("lon")
-        if not p_lat or not p_lng:
-            continue
+    merged.sort(key=lambda p: p["dist"])
+    merged = merged[:limit]
 
-        tags = el.get("tags", {})
-        name = tags.get("name") or tags.get("name:en")
-        if not name:
-            continue
-
-        dist = haversine(lat, lng, p_lat, p_lng)
-        if dist > radius_km:
-            continue
-
-        classification = classify_tags(tags)
-        wiki_url = build_wiki_url(tags.get("wikipedia", ""))
-        website  = tags.get("website") or tags.get("contact:website")
-        desc     = (tags.get("description")
-                    or tags.get("description:en")
-                    or tags.get("note")
-                    or f"A {classification['subtype'] or classification['type']} point of interest in this area.")
-
-        places.append({
-            "id":           el["id"],
-            "name":         name,
-            "lat":          p_lat,
-            "lng":          p_lng,
-            "dist":         round(dist, 3),
-            "type":         classification["type"],
-            "subtype":      classification["subtype"],
-            "icon":         classification["icon"],
-            "website":      website,
-            "wiki":         wiki_url,
-            "desc":         desc,
-            "opening_hours":tags.get("opening_hours"),
-            "phone":        tags.get("phone") or tags.get("contact:phone"),
-            "fee":          tags.get("fee"),
-            "access":       tags.get("access"),
-        })
-
-    places.sort(key=lambda p: p["dist"])
-
-    # Cache the full list, return the limited slice
-    _cache_set(ckey, places)
-    sliced = places[:limit]
-    return jsonify({"count": len(sliced), "places": sliced, "cached": False})
+    _cache_set(ckey, merged)
+    return jsonify({"count": len(merged), "places": merged, "cached": False})
 
 
 

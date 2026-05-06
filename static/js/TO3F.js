@@ -10,6 +10,7 @@ let map, userCoords, userMarker, radiusCircle;
 let allPlaces = [], activeMarkers = [];
 let radiusKm = 50, activeCategory = 'all';
 let routeLayer = null, routeInfoEl = null;
+let selectedPlace = null;
 
 // ── BOOT ──────────────────────────────────────────
 window.addEventListener('load', () => {
@@ -196,55 +197,95 @@ async function fetchPlaces({ lat, lng }, km) {
   setLoading(true);
   setHead('Scanning…', `Searching within ${km} km`);
 
-  // 1. Try the Flask backend (/api/nearby)
+  // 1. Try the Flask backend (/api/nearby) — fast path with cache + parallel mirrors
   try {
-    const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}&radius_km=${km}`, { signal: AbortSignal.timeout(2000) });
+    const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}&radius_km=${km}&limit=30`, {
+      signal: AbortSignal.timeout(2000),
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data.places && data.places.length >= 0) {
+    if (data.places) {
       if (data.cached) toast('Loaded from cache ⚡', 'success', 'fa-bolt');
       processPlaces(data.places);
       return;
     }
   } catch (_) {
-    // Backend unreachable — fall through to direct Overpass mode
+    // Flask not running — fall through to direct Wikipedia Geosearch
   }
 
-  // 2. Fallback: call Overpass directly from the browser
-  // This happens when Flask isn't running (e.g. opened via Live Server).
-  // Tip: run `python TO3.py` and open localhost:5000 for faster backend mode.
-  toast('Querying Overpass directly…', 'info', 'fa-satellite-dish');
-  const r = km * 1000;
-  const q = `[out:json][timeout:30];(
-    node["tourism"](around:${r},${lat},${lng});
-    node["historic"](around:${r},${lat},${lng});
-    node["natural"~"peak|waterfall|cave|beach|hot_spring|volcano|viewpoint|glacier"](around:${r},${lat},${lng});
-    node["leisure"~"park|nature_reserve|garden"](around:${r},${lat},${lng});
-    node["amenity"~"place_of_worship|museum|arts_centre|theatre"](around:${r},${lat},${lng});
-    way["tourism"~"attraction|museum|viewpoint|zoo|gallery"](around:${r},${lat},${lng});
-  );out center body 200;`;
-
+  // 2. Fallback: Wikipedia Geosearch directly from browser (~300 ms)
+  //    Shows only notable, must-visit places — much faster than Overpass.
   try {
-    // Race two Overpass mirrors — whichever answers first wins
-    const MIRRORS = [
-      'https://overpass-api.de/api/interpreter',
-      'https://overpass.kumi.systems/api/interpreter',
-    ];
-    const body = 'data=' + encodeURIComponent(q);
-    const res = await Promise.any(
-      MIRRORS.map(url => fetch(url, { method:'POST', body, signal: AbortSignal.timeout(28000) }))
-    );
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    processRawOverpass(data.elements, { lat, lng }, km);
+    toast('Searching notable places…', 'info', 'fa-magnifying-glass');
+    const places = await wikiGeoSearch(lat, lng, km);
+    processPlaces(places);
   } catch (err) {
     setLoading(false);
-    setHead('Error', 'Could not load data. Please try again.');
-    toast('Failed to fetch places.', 'error', 'fa-triangle-exclamation');
+    setHead('Error', 'Could not load places. Please try again.');
+    toast('Search failed. Check connection.', 'error', 'fa-triangle-exclamation');
   }
 }
 
-// Called when data comes from the Flask backend (already processed)
+// Wikipedia Geosearch — returns only places famous enough to have a Wikipedia article.
+// Runs in ~300 ms. For large radii, tiles the area with offset calls to widen coverage.
+async function wikiGeoSearch(lat, lng, km) {
+  const tileRadius = Math.min(km * 1000, 10000); // Wikipedia caps at 10 000 m
+  const offsets    = [[0, 0]];
+  if (km > 15) {
+    const step = km * 0.45 / 111;
+    offsets.push([step, 0], [-step, 0], [0, step], [0, -step]);
+  }
+
+  const seenIds = new Set();
+  const places  = [];
+
+  await Promise.all(offsets.map(async ([dlat, dlng]) => {
+    const coord = `${lat + dlat}|${lng + dlng}`;
+    const url   = `https://en.wikipedia.org/w/api.php`
+      + `?action=query&generator=geosearch`
+      + `&ggscoord=${coord}&ggsradius=${tileRadius}&ggslimit=20`
+      + `&prop=pageimages|coordinates|extracts`
+      + `&pithumbsize=500&exintro=1&exchars=500&format=json&origin=*`;
+
+    const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const data = await res.json();
+    const pages = Object.values((data.query || {}).pages || {});
+
+    pages.forEach(page => {
+      if (seenIds.has(page.pageid)) return;
+      seenIds.add(page.pageid);
+      const coords = (page.coordinates || [{}])[0];
+      const p_lat  = coords.lat;
+      const p_lng  = coords.lon;
+      if (!p_lat || !p_lng) return;
+      const dist = haversine(lat, lng, p_lat, p_lng);
+      if (dist > km) return;
+      const title   = page.title || '';
+      const extract = (page.extract || '').trim();
+      const img     = (page.thumbnail || {}).source || null;
+      places.push({
+        id:           `wiki_${page.pageid}`,
+        name:         title,
+        lat:          p_lat,
+        lng:          p_lng,
+        dist:         Math.round(dist * 1000) / 1000,
+        type:         'attraction',
+        subtype:      'attraction',
+        icon:         'fa-star',
+        website:      null,
+        wiki:         `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g,'_'))}`,
+        img,
+        desc:         extract || 'A notable attraction near your location.',
+        opening_hours:null, phone:null, fee:null, access:null,
+      });
+    });
+  }));
+
+  places.sort((a, b) => a.dist - b.dist);
+  return places.slice(0, 30);
+}
+
+// Called when data arrives (from Flask or direct Wikipedia)
 function processPlaces(places) {
   clearMarkers();
   allPlaces = places;
@@ -253,61 +294,10 @@ function processPlaces(places) {
   showMarkers(filtered);
   setLoading(false);
   setHead(`${allPlaces.length} Places Found`, `Within ${radiusKm} km of your location`);
-  toast(`Found ${allPlaces.length} destinations!`, 'success', 'fa-map-pin');
+  toast(`Found ${allPlaces.length} places!`, 'success', 'fa-map-pin');
 }
 
-// Called when data comes directly from Overpass (raw elements)
-function processRawOverpass(els, uPos, km) {
-  clearMarkers(); allPlaces = [];
-  els.forEach(el => {
-    const lat = el.lat || el.center?.lat;
-    const lng = el.lon || el.center?.lon;
-    if (!lat || !lng) return;
-    const tags = el.tags || {};
-    const name = tags.name || tags['name:en'];
-    if (!name) return;
-    const dist = haversine(uPos.lat, uPos.lng, lat, lng);
-    if (dist > km) return;
-    const { type, subtype, icon } = classify(tags);
-    const wiki = tags.wikipedia
-      ? 'https://en.wikipedia.org/wiki/' + encodeURIComponent(tags.wikipedia.replace(/^[a-z]+:/, ''))
-      : null;
-    const website = tags.website || tags['contact:website'] || null;
-    const desc    = tags.description || tags['description:en'] || tags.note
-      || `A ${subtype || type} point of interest in this area.`;
-    allPlaces.push({
-      id: el.id, name, lat, lng, dist, type, subtype, icon,
-      website, wiki, desc,
-      opening_hours: tags.opening_hours || null,
-      phone:         tags.phone || tags['contact:phone'] || null,
-      fee:           tags.fee || null,
-      access:        tags.access || null,
-    });
-  });
-  allPlaces.sort((a, b) => a.dist - b.dist).splice(150);
-  const filtered = catFilter(allPlaces);
-  renderList(filtered);
-  showMarkers(filtered);
-  setLoading(false);
-  setHead(`${allPlaces.length} Places Found`, `Within ${km} km of your location`);
-  toast(`Found ${allPlaces.length} destinations!`, 'success', 'fa-map-pin');
-}
 
-// classify() — only used in fallback (Overpass direct) mode
-function classify(t) {
-  const { tourism, historic, natural, leisure, amenity } = t;
-  const nm = { peak:'fa-mountain', waterfall:'fa-water', cave:'fa-circle-half-stroke', beach:'fa-umbrella-beach', hot_spring:'fa-hot-tub-person', viewpoint:'fa-binoculars', glacier:'fa-snowflake' };
-  const tm = { museum:'fa-building-columns', attraction:'fa-star', artwork:'fa-palette', zoo:'fa-paw', gallery:'fa-image', camp_site:'fa-campground' };
-  const hm = { monument:'fa-monument', castle:'fa-chess-rook', ruins:'fa-archway', temple:'fa-place-of-worship', memorial:'fa-star' };
-  const am = { place_of_worship:'fa-place-of-worship', museum:'fa-building-columns', theatre:'fa-masks-theater', arts_centre:'fa-palette' };
-  if (natural)            return { type:'natural',  subtype:natural,      icon:nm[natural]  || 'fa-leaf' };
-  if (tourism==='viewpoint') return { type:'viewpoint', subtype:'Viewpoint', icon:'fa-binoculars' };
-  if (tourism)            return { type:'tourism',  subtype:tourism,      icon:tm[tourism]  || 'fa-camera-retro' };
-  if (historic)           return { type:'historic', subtype:historic,     icon:hm[historic] || 'fa-landmark' };
-  if (leisure)            return { type:'leisure',  subtype:leisure,      icon:'fa-leaf' };
-  if (amenity)            return { type:'amenity',  subtype:amenity,      icon:am[amenity]  || 'fa-mug-hot' };
-  return { type:'other', subtype:'Point of Interest', icon:'fa-location-dot' };
-}
 
 function haversine(a, b, c, d) {
   const R=6371, dL=(c-a)*Math.PI/180, dO=(d-b)*Math.PI/180;
@@ -382,20 +372,46 @@ function showRouteInfo(distKm, mins, name) {
 }
 
 // ── MARKERS WITH BIG HOVER TOOLTIP ────────────────
+// Builds a Leaflet divIcon — red pin when selected, type dot otherwise
+function makeIcon(type, selected = false) {
+  if (selected) return L.divIcon({
+    className:'', iconSize:[28,28], iconAnchor:[14,28],
+    html:`<div class="m-dot m-selected"><i class="fa-solid fa-location-dot"></i></div>`
+  });
+  return L.divIcon({
+    className:'', iconSize:[14,14], iconAnchor:[7,7],
+    html:`<div class="m-dot m-${type}"></div>`
+  });
+}
+
 function showMarkers(places) {
   clearMarkers();
+  selectedPlace = null;
   places.forEach(p => {
-    const marker = L.marker([p.lat, p.lng], {
-      icon: L.divIcon({ className:'', html:`<div class="m-dot m-${p.type}"></div>`, iconSize:[14,14], iconAnchor:[7,7] })
-    }).addTo(map);
-
+    const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p.type) }).addTo(map);
     marker.bindTooltip(buildBigTip(p), {
       className:'big-tip', direction:'top', offset:[0,-10], opacity:1, sticky:false,
     });
-    marker.on('click', () => { openPlaceLink(p); highlightCard(p.id); });
+    marker.on('click', () => { selectPlace(p); openPlaceModal(p); });
     p.marker = marker;
     activeMarkers.push(marker);
   });
+}
+
+function selectPlace(p) {
+  clearRoute();
+  activeMarkers.forEach(m => m.closeTooltip());
+  if (selectedPlace?.marker) {
+    selectedPlace.marker.setIcon(makeIcon(selectedPlace.type, false));
+    selectedPlace.marker.setZIndexOffset(0);
+  }
+  selectedPlace = p;
+  if (p.marker) {
+    p.marker.setIcon(makeIcon(p.type, true));
+    p.marker.setZIndexOffset(1000);
+    setTimeout(() => p.marker?.openTooltip(), 400);
+  }
+  highlightCard(p.id);
 }
 
 function buildBigTip(p) {
@@ -457,8 +473,8 @@ function renderList(places) {
       </div>`;
     card.addEventListener('click', () => {
       map.flyTo([p.lat, p.lng], 14, { animate:true, duration:1 });
-      setTimeout(() => p.marker?.openTooltip(), 1000);
-      highlightCard(p.id);
+      selectPlace(p);
+      openPlaceModal(p);
     });
     list.appendChild(card);
   });
@@ -470,10 +486,89 @@ function highlightCard(id) {
   if (c) { c.classList.add('active'); c.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
 }
 
-function openPlaceLink(p) {
-  const url = p.website || p.wiki
-    || `https://www.google.com/search?q=${encodeURIComponent(p.name+' '+cap(p.subtype||p.type)+' Nepal')}`;
-  window.open(url, '_blank', 'noopener,noreferrer');
+// ── PLACE DETAIL MODAL ────────────────────────────
+// Image priority: 1) p.img already on the object (Wikipedia Geosearch)
+//                 2) Backend /api/place-detail (3-step Wiki/Commons search)
+//                 3) contextualImg type-based Unsplash fallback
+
+function contextualImg(p) {
+  const MAP = {
+    peak:'photo-1516912481808-3406841bd33c', waterfall:'photo-1504701954957-2010ec3bcec1',
+    cave:'photo-1520206183501-b80df61043c2', viewpoint:'photo-1464822759023-fed622ff2c3b',
+    glacier:'photo-1551524163-b5df2c9ef5c4', beach:'photo-1507525428034-b723cf961d3e',
+    hot_spring:'photo-1548013146-72479768bada', museum:'photo-1554907984-15263bfd63bd',
+    monument:'photo-1564507592333-c60657eea523', castle:'photo-1548625149-720f89a9d753',
+    ruins:'photo-1548625149-720f89a9d753', temple:'photo-1590050753481-35a76a5f3f9a',
+    place_of_worship:'photo-1590050753481-35a76a5f3f9a', memorial:'photo-1515191107209-c28698631303',
+    park:'photo-1469474968028-56623f02e42e', nature_reserve:'photo-1426604966848-d7adac402bff',
+    garden:'photo-1585320806297-9794b3e4eeae', zoo:'photo-1503919545889-aef636e10ad4',
+    theatre:'photo-1503095396549-807759245b35', arts_centre:'photo-1531243269054-5ebf3f408be2',
+    attraction:'photo-1476514525535-07fb3b4ae5f1',
+  };
+  const id = MAP[p.subtype] || MAP[p.type] || 'photo-1506905925346-21bda4d32df4';
+  return `https://images.unsplash.com/${id}?w=800&q=80&auto=format&fit=crop`;
+}
+
+async function openPlaceModal(p) {
+  const modal   = document.getElementById('dest-modal');
+  const content = document.getElementById('modal-content');
+  content.innerHTML = `<div class="pm-loading"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading…</span></div>`;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // If p.img already exists (from Wikipedia Geosearch), skip the backend call
+  let wiki = { summary: p.desc || null, extract2: null, img: p.img || null, url: p.wiki || null };
+  if (!wiki.img) wiki = await fetchWikiData(p.name);
+
+  const dist     = p.dist < 1 ? `${Math.round(p.dist*1000)} m away` : `${p.dist.toFixed(1)} km away`;
+  const extUrl   = p.website || p.wiki || `https://www.google.com/search?q=${encodeURIComponent(p.name+' Nepal')}`;
+  const extLabel = p.website ? 'Visit Website' : p.wiki ? 'Wikipedia' : 'Search Google';
+  const extIcon  = p.website ? 'fa-globe' : p.wiki ? 'fa-wikipedia-w' : 'fa-magnifying-glass';
+  const extClass = p.wiki ? 'fa-brands' : 'fa-solid';
+
+  const chips = [
+    { icon:'fa-route', val:dist },
+    { icon:'fa-tag',   val:cap(p.subtype||p.type) },
+    p.opening_hours && { icon:'fa-clock',          val:p.opening_hours },
+    p.phone         && { icon:'fa-phone',          val:p.phone },
+    p.fee           && { icon:'fa-coins',          val:`Fee: ${p.fee}` },
+    p.access        && { icon:'fa-person-walking', val:`Access: ${p.access}` },
+  ].filter(Boolean);
+
+  const imgSrc  = wiki.img || contextualImg(p);
+  const summary = wiki.summary || p.desc;
+
+  content.innerHTML = `
+    <div class="modal-hero-img pm-hero">
+      <img src="${imgSrc}" alt="${p.name}" onerror="this.src='${contextualImg(p)}'"/>
+      <div class="modal-hero-img-overlay"></div>
+      <div class="pm-type-badge"><i class="fa-solid ${p.icon}"></i> ${cap(p.subtype||p.type)}</div>
+    </div>
+    <div class="modal-inner">
+      <div class="modal-region"><i class="fa-solid fa-location-dot"></i> ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</div>
+      <h2>${p.name}</h2>
+      <div class="modal-chips">${chips.map(c=>`<div class="chip"><i class="fa-solid ${c.icon}"></i>${c.val}</div>`).join('')}</div>
+      <p class="modal-body-text">${summary || ''}</p>
+      ${wiki.extract2 ? `<p class="modal-body-text" style="margin-top:12px">${wiki.extract2}</p>` : ''}
+      <div class="modal-links">
+        <button class="mlink primary" onclick="fetchRoute(${p.lat},${p.lng},'${p.name.replace(/'/g,"\\'")}');closeDestModal()">
+          <i class="fa-solid fa-diamond-turn-right"></i>Get Directions
+        </button>
+        <a href="${extUrl}" target="_blank" rel="noopener" class="mlink secondary">
+          <i class="${extClass} ${extIcon}"></i>${extLabel}
+        </a>
+      </div>
+    </div>`;
+}
+
+async function fetchWikiData(name) {
+  try {
+    const res = await fetch(`/api/place-detail/${encodeURIComponent(name)}`, { signal:AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error();
+    return await res.json();
+  } catch {
+    return { summary:null, extract2:null, img:null, url:null };
+  }
 }
 
 // ── CATEGORY FILTER ──────────────────────────────

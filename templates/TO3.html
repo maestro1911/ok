@@ -108,12 +108,36 @@
 <!-- ══ CATEGORY BAR ══ -->
 <div id="categories">
   <div class="cats-wrap">
-    <div class="cat-item active" data-cat="all" onclick="filterByCategory('all',this)"><i class="fa-solid fa-globe"></i> All Places</div>
-    <div class="cat-item" data-cat="tourism" onclick="filterByCategory('tourism',this)"><i class="fa-solid fa-camera-retro"></i> Attractions</div>
-    <div class="cat-item" data-cat="natural" onclick="filterByCategory('natural',this)"><i class="fa-solid fa-mountain-sun"></i> Nature</div>
-    <div class="cat-item" data-cat="historic" onclick="filterByCategory('historic',this)"><i class="fa-solid fa-landmark"></i> Heritage</div>
-    <div class="cat-item" data-cat="leisure" onclick="filterByCategory('leisure',this)"><i class="fa-solid fa-leaf"></i> Parks</div>
-    <div class="cat-item" data-cat="viewpoint" onclick="filterByCategory('viewpoint',this)"><i class="fa-solid fa-binoculars"></i> Viewpoints</div>
+    <div class="cat-item active" data-cat="all"         onclick="filterByCategory('all',this)">
+      <i class="fa-solid fa-globe"></i><span>All Places</span>
+    </div>
+    <div class="cat-item" data-cat="heritage"           onclick="filterByCategory('heritage',this)">
+      <i class="fa-solid fa-landmark"></i><span>Heritage</span>
+    </div>
+    <div class="cat-item" data-cat="spiritual"          onclick="filterByCategory('spiritual',this)">
+      <i class="fa-solid fa-place-of-worship"></i><span>Spiritual</span>
+    </div>
+    <div class="cat-item" data-cat="nature"             onclick="filterByCategory('nature',this)">
+      <i class="fa-solid fa-mountain-sun"></i><span>Nature</span>
+    </div>
+    <div class="cat-item" data-cat="trekking"           onclick="filterByCategory('trekking',this)">
+      <i class="fa-solid fa-person-hiking"></i><span>Trekking</span>
+    </div>
+    <div class="cat-item" data-cat="viewpoint"          onclick="filterByCategory('viewpoint',this)">
+      <i class="fa-solid fa-binoculars"></i><span>Viewpoints</span>
+    </div>
+    <div class="cat-item" data-cat="wildlife"           onclick="filterByCategory('wildlife',this)">
+      <i class="fa-solid fa-paw"></i><span>Wildlife</span>
+    </div>
+    <div class="cat-item" data-cat="adventure"          onclick="filterByCategory('adventure',this)">
+      <i class="fa-solid fa-parachute-box"></i><span>Adventure</span>
+    </div>
+    <div class="cat-item" data-cat="lakes"              onclick="filterByCategory('lakes',this)">
+      <i class="fa-solid fa-water"></i><span>Lakes & Rivers</span>
+    </div>
+    <div class="cat-item" data-cat="entertainment"      onclick="filterByCategory('entertainment',this)">
+      <i class="fa-solid fa-masks-theater"></i><span>Culture & Arts</span>
+    </div>
   </div>
 </div>
 
@@ -346,10 +370,12 @@
           <p id="result-sub">Press Locate Me to discover nearby places</p>
         </div>
         <div class="sidebar-legend">
-          <span class="leg-dot natural"></span>Nature
-          <span class="leg-dot tourism"></span>Attraction
-          <span class="leg-dot historic"></span>Heritage
-          <span class="leg-dot viewpoint"></span>Viewpoint
+          <span class="leg-dot heritage"></span>Heritage
+          <span class="leg-dot spiritual"></span>Spiritual
+          <span class="leg-dot nature"></span>Nature
+          <span class="leg-dot trekking"></span>Trekking
+          <span class="leg-dot wildlife"></span>Wildlife
+          <span class="leg-dot adventure"></span>Adventure
         </div>
         <div id="place-list">
           <div class="empty-state">
