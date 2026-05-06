@@ -277,12 +277,21 @@ async function fetchPlaces({ lat, lng }, km) {
 function processPlaces(places) {
   clearMarkers();
   allPlaces = places;
+  activeCategory = 'all';
+  // Reset sidebar dropdown to "All Places"
+  const dot = document.getElementById('sbCatDot');
+  const lbl = document.getElementById('sbCatLabel');
+  if (dot) dot.style.background = '#555';
+  if (lbl) lbl.textContent = 'All Places';
+  document.querySelectorAll('.sb-cat-opt').forEach(o =>
+    o.classList.toggle('active', o.dataset.cat === 'all')
+  );
   const filtered = catFilter(allPlaces);
   renderList(filtered);
   showMarkers(filtered);
   setLoading(false);
   setHead(`${allPlaces.length} Places Found`, `Within ${radiusKm} km of your location`);
-  toast(`Found ${allPlaces.length} destinations!`, 'success', 'fa-map-pin');
+  toast(`Found ${allPlaces.length} places!`, 'success', 'fa-map-pin');
 }
 
 // Called when data comes directly from Overpass (raw elements)
@@ -717,18 +726,67 @@ async function fetchWikiData(name) {
   } catch { return { summary:null, extract2:null, img:null, url:null }; }
 }
 
-// ── CATEGORY FILTER ──────────────────────────────
-function filterByCategory(cat, el) {
-  activeCategory = cat;
-  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+// ── SIDEBAR CATEGORY DROPDOWN ─────────────────────
+const CAT_META = {
+  all:           { label:'All Places',     color:'#555',     icon:'fa-globe' },
+  heritage:      { label:'Heritage',       color:'#8B6340',  icon:'fa-landmark' },
+  spiritual:     { label:'Spiritual',      color:'#D4A017',  icon:'fa-place-of-worship' },
+  nature:        { label:'Nature',         color:'#3D7A5F',  icon:'fa-mountain-sun' },
+  trekking:      { label:'Trekking',       color:'#4A9B6F',  icon:'fa-person-hiking' },
+  viewpoint:     { label:'Viewpoints',     color:'#E8854A',  icon:'fa-binoculars' },
+  wildlife:      { label:'Wildlife',       color:'#2E7D32',  icon:'fa-paw' },
+  adventure:     { label:'Adventure',      color:'#C0392B',  icon:'fa-parachute-box' },
+  lakes:         { label:'Lakes & Rivers', color:'#1565C0',  icon:'fa-water' },
+  entertainment: { label:'Culture & Arts', color:'#6A1B9A',  icon:'fa-masks-theater' },
+};
+
+function toggleSbDd() {
+  const menu  = document.getElementById('sbCatMenu');
+  const arrow = document.getElementById('sbCatArrow');
+  const open  = menu.classList.toggle('open');
+  arrow.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function pickSbCat(cat, el) {
+  // Update trigger button appearance
+  const meta = CAT_META[cat] || CAT_META.all;
+  document.getElementById('sbCatDot').style.background  = meta.color;
+  document.getElementById('sbCatLabel').textContent      = meta.label;
+
+  // Mark active option
+  document.querySelectorAll('.sb-cat-opt').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
+
+  // Close dropdown
+  document.getElementById('sbCatMenu').classList.remove('open');
+  document.getElementById('sbCatArrow').style.transform = '';
+
+  // Filter
+  filterByCategory(cat);
+}
+
+// Close sidebar dropdown on outside click
+document.addEventListener('click', e => {
+  const dd = document.getElementById('sbCatDd');
+  if (dd && !dd.contains(e.target)) {
+    document.getElementById('sbCatMenu')?.classList.remove('open');
+    const a = document.getElementById('sbCatArrow');
+    if (a) a.style.transform = '';
+  }
+});
+
+function filterByCategory(cat) {
+  activeCategory = cat;
   clearRoute();
   if (!allPlaces.length) return;
-  const f     = catFilter(allPlaces);
-  const rule  = CATEGORY_RULES.find(r => r.key === cat);
-  const label = el.querySelector('span')?.textContent || cap(cat);
-  renderList(f); showMarkers(f);
-  setHead(`${f.length} Places`, cat === 'all' ? `All categories · ${radiusKm} km` : `${label} · ${radiusKm} km`);
+  const f    = catFilter(allPlaces);
+  const meta = CAT_META[cat] || CAT_META.all;
+  renderList(f);
+  showMarkers(f);
+  setHead(
+    `${f.length} Places Found`,
+    cat === 'all' ? `All categories · ${radiusKm} km` : `${meta.label} · ${radiusKm} km`
+  );
 }
 
 // ── DESTINATION MODAL — data fetched from /api/destinations/:key ──────────

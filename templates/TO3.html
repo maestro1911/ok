@@ -105,41 +105,6 @@
   </div>
 </section>
 
-<!-- ══ CATEGORY BAR ══ -->
-<div id="categories">
-  <div class="cats-wrap">
-    <div class="cat-item active" data-cat="all"         onclick="filterByCategory('all',this)">
-      <i class="fa-solid fa-globe"></i><span>All Places</span>
-    </div>
-    <div class="cat-item" data-cat="heritage"           onclick="filterByCategory('heritage',this)">
-      <i class="fa-solid fa-landmark"></i><span>Heritage</span>
-    </div>
-    <div class="cat-item" data-cat="spiritual"          onclick="filterByCategory('spiritual',this)">
-      <i class="fa-solid fa-place-of-worship"></i><span>Spiritual</span>
-    </div>
-    <div class="cat-item" data-cat="nature"             onclick="filterByCategory('nature',this)">
-      <i class="fa-solid fa-mountain-sun"></i><span>Nature</span>
-    </div>
-    <div class="cat-item" data-cat="trekking"           onclick="filterByCategory('trekking',this)">
-      <i class="fa-solid fa-person-hiking"></i><span>Trekking</span>
-    </div>
-    <div class="cat-item" data-cat="viewpoint"          onclick="filterByCategory('viewpoint',this)">
-      <i class="fa-solid fa-binoculars"></i><span>Viewpoints</span>
-    </div>
-    <div class="cat-item" data-cat="wildlife"           onclick="filterByCategory('wildlife',this)">
-      <i class="fa-solid fa-paw"></i><span>Wildlife</span>
-    </div>
-    <div class="cat-item" data-cat="adventure"          onclick="filterByCategory('adventure',this)">
-      <i class="fa-solid fa-parachute-box"></i><span>Adventure</span>
-    </div>
-    <div class="cat-item" data-cat="lakes"              onclick="filterByCategory('lakes',this)">
-      <i class="fa-solid fa-water"></i><span>Lakes & Rivers</span>
-    </div>
-    <div class="cat-item" data-cat="entertainment"      onclick="filterByCategory('entertainment',this)">
-      <i class="fa-solid fa-masks-theater"></i><span>Culture & Arts</span>
-    </div>
-  </div>
-</div>
 
 <!-- ══ PHOTO STRIP ══ -->
 <div class="photo-strip">
@@ -377,6 +342,31 @@
           <span class="leg-dot wildlife"></span>Wildlife
           <span class="leg-dot adventure"></span>Adventure
         </div>
+
+        <!-- ══ INLINE CATEGORY DROPDOWN ══ -->
+        <div class="sb-cat-bar">
+          <span class="sb-cat-label"><i class="fa-solid fa-layer-group"></i> Category</span>
+          <div class="sb-cat-dd" id="sbCatDd">
+            <button class="sb-cat-trigger" id="sbCatTrigger" onclick="toggleSbDd()">
+              <span class="sb-cat-dot" id="sbCatDot" style="background:#555"></span>
+              <span id="sbCatLabel">All Places</span>
+              <i class="fa-solid fa-chevron-down" id="sbCatArrow"></i>
+            </button>
+            <div class="sb-cat-menu" id="sbCatMenu">
+              <div class="sb-cat-opt active" data-cat="all"           onclick="pickSbCat('all',this)"><span class="sb-cat-opt-dot" style="background:#555"></span><i class="fa-solid fa-globe"></i> All Places</div>
+              <div class="sb-cat-opt" data-cat="heritage"             onclick="pickSbCat('heritage',this)"><span class="sb-cat-opt-dot" style="background:#8B6340"></span><i class="fa-solid fa-landmark"></i> Heritage</div>
+              <div class="sb-cat-opt" data-cat="spiritual"            onclick="pickSbCat('spiritual',this)"><span class="sb-cat-opt-dot" style="background:#D4A017"></span><i class="fa-solid fa-place-of-worship"></i> Spiritual</div>
+              <div class="sb-cat-opt" data-cat="nature"               onclick="pickSbCat('nature',this)"><span class="sb-cat-opt-dot" style="background:#3D7A5F"></span><i class="fa-solid fa-mountain-sun"></i> Nature</div>
+              <div class="sb-cat-opt" data-cat="trekking"             onclick="pickSbCat('trekking',this)"><span class="sb-cat-opt-dot" style="background:#4A9B6F"></span><i class="fa-solid fa-person-hiking"></i> Trekking</div>
+              <div class="sb-cat-opt" data-cat="viewpoint"            onclick="pickSbCat('viewpoint',this)"><span class="sb-cat-opt-dot" style="background:#E8854A"></span><i class="fa-solid fa-binoculars"></i> Viewpoints</div>
+              <div class="sb-cat-opt" data-cat="wildlife"             onclick="pickSbCat('wildlife',this)"><span class="sb-cat-opt-dot" style="background:#2E7D32"></span><i class="fa-solid fa-paw"></i> Wildlife</div>
+              <div class="sb-cat-opt" data-cat="adventure"            onclick="pickSbCat('adventure',this)"><span class="sb-cat-opt-dot" style="background:#C0392B"></span><i class="fa-solid fa-parachute-box"></i> Adventure</div>
+              <div class="sb-cat-opt" data-cat="lakes"                onclick="pickSbCat('lakes',this)"><span class="sb-cat-opt-dot" style="background:#1565C0"></span><i class="fa-solid fa-water"></i> Lakes &amp; Rivers</div>
+              <div class="sb-cat-opt" data-cat="entertainment"        onclick="pickSbCat('entertainment',this)"><span class="sb-cat-opt-dot" style="background:#6A1B9A"></span><i class="fa-solid fa-masks-theater"></i> Culture &amp; Arts</div>
+            </div>
+          </div>
+        </div>
+
         <div id="place-list">
           <div class="empty-state">
             <div class="empty-icon"><i class="fa-solid fa-compass"></i></div>
