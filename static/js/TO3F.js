@@ -12,7 +12,47 @@ let radiusKm = 50, activeCategory = 'all';
 let routeLayer = null, routeInfoEl = null;
 let selectedPlace = null;
 
-// ── BOOT ──────────────────────────────────────────
+// ── TOURIST CATEGORY CLASSIFIER ───────────────────────────────────────────────
+const CATEGORY_RULES = [
+  { key:'heritage',      icon:'fa-landmark',         color:'#8B6340',
+    types:['historic','museum'],
+    keywords:['durbar','palace','fort','castle','ruins','ruin','museum','heritage','historical','history','ancient','medieval','square','darbar','bhaktapur','patan','monument','memorial','archaeological','old city','bazaar','newari','listed'] },
+  { key:'spiritual',     icon:'fa-place-of-worship', color:'#D4A017',
+    types:['place_of_worship','temple'],
+    keywords:['temple','mandir','monastery','gompa','stupa','shrine','church','mosque','sacred','religious','spiritual','prayer','deity','god','goddess','buddha','buddhist','hindu','jain','pilgrimage','pagoda','vihara','math','ashram','yoga','meditation','puja','pashupatinath','boudha','swayambhu','lumbini','muktinath','janaki','mayadevi','bindebasini'] },
+  { key:'trekking',      icon:'fa-person-hiking',    color:'#4A9B6F',
+    types:[],
+    keywords:['trek','trekking','trail','base camp','basecamp','circuit','route','pass','la pass','thorong','annapurna','everest','langtang','manaslu','expedition','high altitude','camp','lodge','teahouse','gokyo','namche','lukla','jomsom','dolpo','poon hill','chisapani','helambu','gosaikunda'] },
+  { key:'viewpoint',     icon:'fa-binoculars',       color:'#E8854A',
+    types:['viewpoint'],
+    keywords:['viewpoint','view point','view tower','hilltop','sunrise','sunset','panorama','observatory','lookout','sarangkot','nagarkot','chandragiri','kakani','daman','hill station','ridgeline'] },
+  { key:'wildlife',      icon:'fa-paw',              color:'#2E7D32',
+    types:['zoo','nature_reserve'],
+    keywords:['national park','wildlife','safari','reserve','nature reserve','zoo','rhino','tiger','elephant','leopard','bear','deer','bird','birding','chitwan','bardia','koshi tappu','shivapuri','conservation','sanctuary','forest reserve','jungle'] },
+  { key:'adventure',     icon:'fa-parachute-box',    color:'#C0392B',
+    types:[],
+    keywords:['paragliding','rafting','bungee','zip line','zipline','climbing','kayak','kayaking','canoeing','cycling','mountain bike','adventure','extreme','sport','sports','stadium','arena'] },
+  { key:'lakes',         icon:'fa-water',            color:'#1565C0',
+    types:['waterfall','beach','hot_spring'],
+    keywords:['lake','tal','pond','river','waterfall','falls','dam','reservoir','stream','kund','phewa','rara','begnas','fewa','tilicho','gosaikunda','hot spring','spring','glacier lake','glacial','wetland'] },
+  { key:'entertainment', icon:'fa-masks-theater',    color:'#6A1B9A',
+    types:['theatre','arts_centre','artwork','gallery'],
+    keywords:['museum','gallery','art','theatre','theater','cultural centre','arts','exhibition','cinema','craft','handicraft','thanka','painting','sculpture','folk','dance','music','mela','fair','market','shopping','botanical','entertainment'] },
+  { key:'nature',        icon:'fa-mountain-sun',     color:'#3D7A5F',
+    types:['natural','peak','cave','glacier'],
+    keywords:['peak','mountain','hill','cave','glacier','valley','canyon','gorge','forest','jungle','nature','scenic','landscape','terrain','rock','cliff','ridge','plateau','meadow','alpine','himalaya','himal','natural','ecology','ecosystem'] },
+];
+
+function touristCategory(p) {
+  const hay = [p.name||'',p.desc||'',p.subtype||'',p.type||''].join(' ').toLowerCase();
+  for (const r of CATEGORY_RULES) {
+    if (r.types.includes(p.type) || r.types.includes(p.subtype)) return r.key;
+    if (r.keywords.some(kw => hay.includes(kw))) return r.key;
+  }
+  return 'heritage';
+}
+
+
 window.addEventListener('load', () => {
   setTimeout(() => {
     document.getElementById('loader').classList.add('gone');
@@ -141,9 +181,8 @@ function initSearch() {
 }
 
 function catFilter(arr) {
-  return activeCategory === 'all'
-    ? arr
-    : arr.filter(p => p.type === activeCategory || p.subtype === activeCategory);
+  if (activeCategory === 'all') return arr;
+  return arr.filter(p => touristCategory(p) === activeCategory);
 }
 
 // ── NEAR ME ───────────────────────────────────────
@@ -197,98 +236,56 @@ async function fetchPlaces({ lat, lng }, km) {
   setLoading(true);
   setHead('Scanning…', `Searching within ${km} km`);
 
-  // 1. Try the Flask backend (/api/nearby) — fast path with cache + parallel mirrors
+  // 1. Try the Flask backend (/api/nearby)
   try {
-    const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}&radius_km=${km}&limit=30`, {
-      signal: AbortSignal.timeout(2000),
-    });
+    const res = await fetch(`/api/nearby?lat=${lat}&lng=${lng}&radius_km=${km}`, { signal: AbortSignal.timeout(75000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    if (data.places) {
-      if (data.cached) toast('Loaded from cache ⚡', 'success', 'fa-bolt');
+    if (data.places && data.places.length >= 0) {
       processPlaces(data.places);
       return;
     }
   } catch (_) {
-    // Flask not running — fall through to direct Wikipedia Geosearch
+    // Backend unreachable (e.g. opened via Live Server) — fall through to Overpass
   }
 
-  // 2. Fallback: Wikipedia Geosearch directly from browser (~300 ms)
-  //    Shows only notable, must-visit places — much faster than Overpass.
+  // 2. Fallback: call Overpass directly from the browser
+  toast('Using direct mode…', 'info', 'fa-satellite-dish');
+  const r = km * 1000;
+  const q = `[out:json][timeout:60];(
+    node["tourism"](around:${r},${lat},${lng});
+    node["historic"](around:${r},${lat},${lng});
+    node["natural"~"peak|waterfall|cave|beach|hot_spring|volcano|viewpoint|glacier"](around:${r},${lat},${lng});
+    node["leisure"~"park|nature_reserve|garden"](around:${r},${lat},${lng});
+    node["amenity"~"place_of_worship|museum|arts_centre|theatre"](around:${r},${lat},${lng});
+    way["tourism"~"attraction|museum|viewpoint|zoo|gallery"](around:${r},${lat},${lng});
+  );out center body 2000;`;
+
   try {
-    toast('Searching notable places…', 'info', 'fa-magnifying-glass');
-    const places = await wikiGeoSearch(lat, lng, km);
-    processPlaces(places);
+    const res  = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data='+encodeURIComponent(q) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    processRawOverpass(data.elements, { lat, lng }, km);
   } catch (err) {
     setLoading(false);
-    setHead('Error', 'Could not load places. Please try again.');
-    toast('Search failed. Check connection.', 'error', 'fa-triangle-exclamation');
+    setHead('Error', 'Could not load data. Please try again.');
+    toast('Failed to fetch places.', 'error', 'fa-triangle-exclamation');
   }
 }
 
-// Wikipedia Geosearch — returns only places famous enough to have a Wikipedia article.
-// Runs in ~300 ms. For large radii, tiles the area with offset calls to widen coverage.
-async function wikiGeoSearch(lat, lng, km) {
-  const tileRadius = Math.min(km * 1000, 10000); // Wikipedia caps at 10 000 m
-  const offsets    = [[0, 0]];
-  if (km > 15) {
-    const step = km * 0.45 / 111;
-    offsets.push([step, 0], [-step, 0], [0, step], [0, -step]);
-  }
-
-  const seenIds = new Set();
-  const places  = [];
-
-  await Promise.all(offsets.map(async ([dlat, dlng]) => {
-    const coord = `${lat + dlat}|${lng + dlng}`;
-    const url   = `https://en.wikipedia.org/w/api.php`
-      + `?action=query&generator=geosearch`
-      + `&ggscoord=${coord}&ggsradius=${tileRadius}&ggslimit=20`
-      + `&prop=pageimages|coordinates|extracts`
-      + `&pithumbsize=500&exintro=1&exchars=500&format=json&origin=*`;
-
-    const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    const data = await res.json();
-    const pages = Object.values((data.query || {}).pages || {});
-
-    pages.forEach(page => {
-      if (seenIds.has(page.pageid)) return;
-      seenIds.add(page.pageid);
-      const coords = (page.coordinates || [{}])[0];
-      const p_lat  = coords.lat;
-      const p_lng  = coords.lon;
-      if (!p_lat || !p_lng) return;
-      const dist = haversine(lat, lng, p_lat, p_lng);
-      if (dist > km) return;
-      const title   = page.title || '';
-      const extract = (page.extract || '').trim();
-      const img     = (page.thumbnail || {}).source || null;
-      places.push({
-        id:           `wiki_${page.pageid}`,
-        name:         title,
-        lat:          p_lat,
-        lng:          p_lng,
-        dist:         Math.round(dist * 1000) / 1000,
-        type:         'attraction',
-        subtype:      'attraction',
-        icon:         'fa-star',
-        website:      null,
-        wiki:         `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g,'_'))}`,
-        img,
-        desc:         extract || 'A notable attraction near your location.',
-        opening_hours:null, phone:null, fee:null, access:null,
-      });
-    });
-  }));
-
-  places.sort((a, b) => a.dist - b.dist);
-  return places.slice(0, 30);
-}
-
-// Called when data arrives (from Flask or direct Wikipedia)
+// Called when data comes from the Flask backend (already processed)
 function processPlaces(places) {
   clearMarkers();
   allPlaces = places;
+  activeCategory = 'all';
+  // Reset sidebar dropdown to "All Places"
+  const dot = document.getElementById('sbCatDot');
+  const lbl = document.getElementById('sbCatLabel');
+  if (dot) dot.style.background = '#555';
+  if (lbl) lbl.textContent = 'All Places';
+  document.querySelectorAll('.sb-cat-opt').forEach(o =>
+    o.classList.toggle('active', o.dataset.cat === 'all')
+  );
   const filtered = catFilter(allPlaces);
   renderList(filtered);
   showMarkers(filtered);
@@ -297,7 +294,82 @@ function processPlaces(places) {
   toast(`Found ${allPlaces.length} places!`, 'success', 'fa-map-pin');
 }
 
+// Called when data comes directly from Overpass (raw elements)
+function processRawOverpass(els, uPos, km) {
+  clearMarkers(); allPlaces = [];
+  els.forEach(el => {
+    const lat = el.lat || el.center?.lat;
+    const lng = el.lon || el.center?.lon;
+    if (!lat || !lng) return;
+    const tags = el.tags || {};
+    const name = tags.name || tags['name:en'];
+    if (!name) return;
 
+    // ── STRICT TOURIST PLACE FILTER ──────────────────────────────────
+    // Must have at least one proper tourism/historic/natural OSM tag
+    const hasValidTag =
+      tags.tourism ||
+      tags.historic ||
+      (tags.natural && /peak|waterfall|cave|hot_spring|glacier|beach|viewpoint|volcano|spring/.test(tags.natural)) ||
+      (tags.leisure && /nature_reserve|park|garden/.test(tags.leisure)) ||
+      (tags.amenity && /place_of_worship|museum|arts_centre|theatre/.test(tags.amenity));
+
+    if (!hasValidTag) return;
+
+    // Block only when admin keyword is a SUFFIX of the name (not substring)
+    // "Kavrepalanchok District" → blocked, "Nagarjun Forest Reserve" → allowed
+    const adminPattern = /(\s+(district|province|zone|anchal|vdc|rural\s+municipality|urban\s+municipality|metropolitan\s+city|gaupalika|gaunpalika|nagarpalika|sub-?metropolitan)\s*$|\bward\s+no\.?\s*\d+\b|\bvillage\s+development\s+committee\b|(जिल्ला|नगरपालिका|गाउँपालिका|महानगरपालिका|उपमहानगरपालिका)\s*$)/i;
+    if (adminPattern.test(name)) return;
+
+    // Block names that are clearly just area/division names (too short + no tourism tag)
+    if (name.length < 4) return;
+
+    // Block boundary/landuse/admin nodes
+    if (tags.boundary || tags.admin_level || tags.landuse || tags.place === 'district' || tags.place === 'county' || tags.place === 'state' || tags.place === 'province' || tags.place === 'region') return;
+
+    const dist = haversine(uPos.lat, uPos.lng, lat, lng);
+    if (dist > km) return;
+    const { type, subtype, icon } = classify(tags);
+    const wiki = tags.wikipedia
+      ? 'https://en.wikipedia.org/wiki/' + encodeURIComponent(tags.wikipedia.replace(/^[a-z]+:/, ''))
+      : null;
+    const website = tags.website || tags['contact:website'] || null;
+    const desc    = tags.description || tags['description:en'] || tags.note
+      || `A ${subtype || type} point of interest in this area.`;
+    allPlaces.push({
+      id: el.id, name, lat, lng, dist, type, subtype, icon,
+      website, wiki, desc,
+      opening_hours: tags.opening_hours || null,
+      phone:         tags.phone || tags['contact:phone'] || null,
+      fee:           tags.fee || null,
+      access:        tags.access || null,
+    });
+  });
+  allPlaces.sort((a, b) => a.dist - b.dist);
+  // No hard limit — show all found places
+  const filtered = catFilter(allPlaces);
+  renderList(filtered);
+  showMarkers(filtered);
+  setLoading(false);
+  setHead(`${allPlaces.length} Places Found`, `Within ${km} km of your location`);
+  toast(`Found ${allPlaces.length} destinations!`, 'success', 'fa-map-pin');
+}
+
+// classify() — only used in fallback (Overpass direct) mode
+function classify(t) {
+  const { tourism, historic, natural, leisure, amenity } = t;
+  const nm = { peak:'fa-mountain', waterfall:'fa-water', cave:'fa-circle-half-stroke', beach:'fa-umbrella-beach', hot_spring:'fa-hot-tub-person', viewpoint:'fa-binoculars', glacier:'fa-snowflake' };
+  const tm = { museum:'fa-building-columns', attraction:'fa-star', artwork:'fa-palette', zoo:'fa-paw', gallery:'fa-image', camp_site:'fa-campground' };
+  const hm = { monument:'fa-monument', castle:'fa-chess-rook', ruins:'fa-archway', temple:'fa-place-of-worship', memorial:'fa-star' };
+  const am = { place_of_worship:'fa-place-of-worship', museum:'fa-building-columns', theatre:'fa-masks-theater', arts_centre:'fa-palette' };
+  if (natural)            return { type:'natural',  subtype:natural,      icon:nm[natural]  || 'fa-leaf' };
+  if (tourism==='viewpoint') return { type:'viewpoint', subtype:'Viewpoint', icon:'fa-binoculars' };
+  if (tourism)            return { type:'tourism',  subtype:tourism,      icon:tm[tourism]  || 'fa-camera-retro' };
+  if (historic)           return { type:'historic', subtype:historic,     icon:hm[historic] || 'fa-landmark' };
+  if (leisure)            return { type:'leisure',  subtype:leisure,      icon:'fa-leaf' };
+  if (amenity)            return { type:'amenity',  subtype:amenity,      icon:am[amenity]  || 'fa-mug-hot' };
+  return { type:'other', subtype:'Point of Interest', icon:'fa-location-dot' };
+}
 
 function haversine(a, b, c, d) {
   const R=6371, dL=(c-a)*Math.PI/180, dO=(d-b)*Math.PI/180;
@@ -372,15 +444,17 @@ function showRouteInfo(distKm, mins, name) {
 }
 
 // ── MARKERS WITH BIG HOVER TOOLTIP ────────────────
-// Builds a Leaflet divIcon — red pin when selected, type dot otherwise
-function makeIcon(type, selected = false) {
+function makeIcon(p, selected = false) {
   if (selected) return L.divIcon({
     className:'', iconSize:[28,28], iconAnchor:[14,28],
     html:`<div class="m-dot m-selected"><i class="fa-solid fa-location-dot"></i></div>`
   });
+  const cat   = touristCategory(p);
+  const rule  = CATEGORY_RULES.find(r => r.key === cat);
+  const color = rule ? rule.color : '#9B7B6A';
   return L.divIcon({
     className:'', iconSize:[14,14], iconAnchor:[7,7],
-    html:`<div class="m-dot m-${type}"></div>`
+    html:`<div class="m-dot" style="background:${color}"></div>`
   });
 }
 
@@ -388,7 +462,7 @@ function showMarkers(places) {
   clearMarkers();
   selectedPlace = null;
   places.forEach(p => {
-    const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p.type) }).addTo(map);
+    const marker = L.marker([p.lat, p.lng], { icon: makeIcon(p) }).addTo(map);
     marker.bindTooltip(buildBigTip(p), {
       className:'big-tip', direction:'top', offset:[0,-10], opacity:1, sticky:false,
     });
@@ -402,12 +476,12 @@ function selectPlace(p) {
   clearRoute();
   activeMarkers.forEach(m => m.closeTooltip());
   if (selectedPlace?.marker) {
-    selectedPlace.marker.setIcon(makeIcon(selectedPlace.type, false));
+    selectedPlace.marker.setIcon(makeIcon(selectedPlace, false));
     selectedPlace.marker.setZIndexOffset(0);
   }
   selectedPlace = p;
   if (p.marker) {
-    p.marker.setIcon(makeIcon(p.type, true));
+    p.marker.setIcon(makeIcon(p, true));
     p.marker.setZIndexOffset(1000);
     setTimeout(() => p.marker?.openTooltip(), 400);
   }
@@ -486,101 +560,257 @@ function highlightCard(id) {
   if (c) { c.classList.add('active'); c.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
 }
 
-// ── PLACE DETAIL MODAL ────────────────────────────
-// Image priority: 1) p.img already on the object (Wikipedia Geosearch)
-//                 2) Backend /api/place-detail (3-step Wiki/Commons search)
-//                 3) contextualImg type-based Unsplash fallback
+// ── PLACE DETAIL MODAL (tabbed) ───────────────────
+// Tabs: Overview · History · Culture & Beliefs · Festivals · Visitor Info
 
+const MODAL_TABS = [
+  { key:'overview',     label:'Overview',           icon:'fa-circle-info' },
+  { key:'history',      label:'History',            icon:'fa-scroll' },
+  { key:'beliefs',      label:'Culture & Beliefs',  icon:'fa-hands-praying' },
+  { key:'festivals',    label:'Festivals',           icon:'fa-star-and-crescent' },
+  { key:'visitor_info', label:'Plan Your Visit',     icon:'fa-map-location-dot' },
+];
+
+// Fallback Unsplash images by tourist category
 function contextualImg(p) {
   const MAP = {
-    peak:'photo-1516912481808-3406841bd33c', waterfall:'photo-1504701954957-2010ec3bcec1',
-    cave:'photo-1520206183501-b80df61043c2', viewpoint:'photo-1464822759023-fed622ff2c3b',
-    glacier:'photo-1551524163-b5df2c9ef5c4', beach:'photo-1507525428034-b723cf961d3e',
-    hot_spring:'photo-1548013146-72479768bada', museum:'photo-1554907984-15263bfd63bd',
-    monument:'photo-1564507592333-c60657eea523', castle:'photo-1548625149-720f89a9d753',
-    ruins:'photo-1548625149-720f89a9d753', temple:'photo-1590050753481-35a76a5f3f9a',
-    place_of_worship:'photo-1590050753481-35a76a5f3f9a', memorial:'photo-1515191107209-c28698631303',
-    park:'photo-1469474968028-56623f02e42e', nature_reserve:'photo-1426604966848-d7adac402bff',
-    garden:'photo-1585320806297-9794b3e4eeae', zoo:'photo-1503919545889-aef636e10ad4',
-    theatre:'photo-1503095396549-807759245b35', arts_centre:'photo-1531243269054-5ebf3f408be2',
-    attraction:'photo-1476514525535-07fb3b4ae5f1',
+    heritage:'photo-1564507592333-c60657eea523', spiritual:'photo-1590050753481-35a76a5f3f9a',
+    trekking:'photo-1464822759023-fed622ff2c3b', viewpoint:'photo-1464822759023-fed622ff2c3b',
+    wildlife:'photo-1426604966848-d7adac402bff', adventure:'photo-1476514525535-07fb3b4ae5f1',
+    lakes:'photo-1548013146-72479768bada',        entertainment:'photo-1531243269054-5ebf3f408be2',
+    nature:'photo-1516912481808-3406841bd33c',
   };
-  const id = MAP[p.subtype] || MAP[p.type] || 'photo-1506905925346-21bda4d32df4';
-  return `https://images.unsplash.com/${id}?w=800&q=80&auto=format&fit=crop`;
+  const cat = touristCategory(p);
+  return `https://images.unsplash.com/${MAP[cat]||'photo-1506905925346-21bda4d32df4'}?w=800&q=80&auto=format&fit=crop`;
 }
 
+// Active tab key — shared across open/switchTab
+let _activeTab = 'overview';
+let _placeData  = null; // cached detail response for current modal
+
 async function openPlaceModal(p) {
+  _activeTab  = 'overview';
+  _placeData  = null;
   const modal   = document.getElementById('dest-modal');
   const content = document.getElementById('modal-content');
-  content.innerHTML = `<div class="pm-loading"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading…</span></div>`;
+  const rule    = CATEGORY_RULES.find(r => r.key === touristCategory(p));
+  const extUrl  = p.website || p.wiki || `https://www.google.com/search?q=${encodeURIComponent(p.name+' Nepal')}`;
+
+  // Render shell immediately with spinner in content area
+  content.innerHTML = _modalShell(p, rule, extUrl, null, { overview:'', history:'', beliefs:'', festivals:'', visitor_info:'' }, true);
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  // If p.img already exists (from Wikipedia Geosearch), skip the backend call
-  let wiki = { summary: p.desc || null, extract2: null, img: p.img || null, url: p.wiki || null };
-  if (!wiki.img) wiki = await fetchWikiData(p.name);
+  // Fetch rich data from backend
+  let detail;
+  try {
+    const res = await fetch(`/api/place-detail/${encodeURIComponent(p.name)}`, { signal: AbortSignal.timeout(12000) });
+    detail = res.ok ? await res.json() : null;
+  } catch { detail = null; }
 
-  const dist     = p.dist < 1 ? `${Math.round(p.dist*1000)} m away` : `${p.dist.toFixed(1)} km away`;
-  const extUrl   = p.website || p.wiki || `https://www.google.com/search?q=${encodeURIComponent(p.name+' Nepal')}`;
-  const extLabel = p.website ? 'Visit Website' : p.wiki ? 'Wikipedia' : 'Search Google';
-  const extIcon  = p.website ? 'fa-globe' : p.wiki ? 'fa-wikipedia-w' : 'fa-magnifying-glass';
-  const extClass = p.wiki ? 'fa-brands' : 'fa-solid';
+  // Fallback structure if backend unreachable
+  if (!detail || !detail.overview) {
+    detail = {
+      title: p.name, img: p.img || null, url: p.wiki || extUrl,
+      overview: p.desc || '', history:'', beliefs:'', festivals:'', visitor_info:'',
+    };
+  }
+
+  _placeData = detail;
+  const imgSrc = detail.img || contextualImg(p);
+
+  // Re-render with real data, keeping active tab
+  content.innerHTML = _modalShell(p, rule, extUrl, imgSrc, detail, false);
+  _switchTab(_activeTab, p);
+}
+
+// Builds the full modal HTML shell with tab bar
+function _modalShell(p, rule, extUrl, imgSrc, detail, loading) {
+  const dist = p.dist < 1 ? `${Math.round(p.dist*1000)} m` : `${p.dist.toFixed(1)} km`;
+  const tabsHtml = MODAL_TABS.map(t => `
+    <button class="pm-tab ${t.key === _activeTab ? 'active':''}"
+            data-tab="${t.key}"
+            onclick="switchPlaceTab('${t.key}')">
+      <i class="fa-solid ${t.icon}"></i><span>${t.label}</span>
+    </button>`).join('');
 
   const chips = [
-    { icon:'fa-route', val:dist },
-    { icon:'fa-tag',   val:cap(p.subtype||p.type) },
-    p.opening_hours && { icon:'fa-clock',          val:p.opening_hours },
-    p.phone         && { icon:'fa-phone',          val:p.phone },
-    p.fee           && { icon:'fa-coins',          val:`Fee: ${p.fee}` },
-    p.access        && { icon:'fa-person-walking', val:`Access: ${p.access}` },
-  ].filter(Boolean);
+    `<div class="chip"><i class="fa-solid fa-route"></i>${dist} away</div>`,
+    rule ? `<div class="chip" style="border-color:${rule.color};color:${rule.color}"><i class="fa-solid ${rule.icon}"></i>${cap(rule.key)}</div>` : '',
+    p.opening_hours ? `<div class="chip"><i class="fa-solid fa-clock"></i>${p.opening_hours}</div>` : '',
+    p.fee           ? `<div class="chip"><i class="fa-solid fa-coins"></i>${p.fee}</div>` : '',
+  ].filter(Boolean).join('');
 
-  const imgSrc  = wiki.img || contextualImg(p);
-  const summary = wiki.summary || p.desc;
+  const heroHtml = imgSrc
+    ? `<img src="${imgSrc}" alt="${p.name}" onerror="this.src='${contextualImg(p)}'"/><div class="modal-hero-img-overlay"></div>`
+    : `<div class="pm-hero-placeholder"><i class="fa-solid ${rule?.icon||'fa-star'}"></i></div>`;
 
-  content.innerHTML = `
+  return `
     <div class="modal-hero-img pm-hero">
-      <img src="${imgSrc}" alt="${p.name}" onerror="this.src='${contextualImg(p)}'"/>
-      <div class="modal-hero-img-overlay"></div>
-      <div class="pm-type-badge"><i class="fa-solid ${p.icon}"></i> ${cap(p.subtype||p.type)}</div>
-    </div>
-    <div class="modal-inner">
-      <div class="modal-region"><i class="fa-solid fa-location-dot"></i> ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</div>
-      <h2>${p.name}</h2>
-      <div class="modal-chips">${chips.map(c=>`<div class="chip"><i class="fa-solid ${c.icon}"></i>${c.val}</div>`).join('')}</div>
-      <p class="modal-body-text">${summary || ''}</p>
-      ${wiki.extract2 ? `<p class="modal-body-text" style="margin-top:12px">${wiki.extract2}</p>` : ''}
-      <div class="modal-links">
-        <button class="mlink primary" onclick="fetchRoute(${p.lat},${p.lng},'${p.name.replace(/'/g,"\\'")}');closeDestModal()">
-          <i class="fa-solid fa-diamond-turn-right"></i>Get Directions
-        </button>
-        <a href="${extUrl}" target="_blank" rel="noopener" class="mlink secondary">
-          <i class="${extClass} ${extIcon}"></i>${extLabel}
-        </a>
+      ${heroHtml}
+      <div class="pm-cat-badge" style="background:${rule?.color||'#8B6340'}">
+        <i class="fa-solid ${rule?.icon||'fa-star'}"></i> ${cap(rule?.key||p.type)}
       </div>
+    </div>
+    <div class="pm-header">
+      <div class="modal-region"><i class="fa-solid fa-location-dot"></i> ${p.lat.toFixed(4)}, ${p.lng.toFixed(4)}</div>
+      <h2>${p.name}</h2>
+      <div class="modal-chips">${chips}</div>
+    </div>
+    <nav class="pm-tabs">${tabsHtml}</nav>
+    <div class="pm-tab-body" id="pm-tab-body">
+      ${loading ? `<div class="pm-loading"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading details…</span></div>` : ''}
+    </div>
+    <div class="pm-footer">
+      <button class="mlink primary" onclick="fetchRoute(${p.lat},${p.lng},'${p.name.replace(/'/g,"\\'")}');closeDestModal()">
+        <i class="fa-solid fa-diamond-turn-right"></i>Get Directions
+      </button>
+      <a href="${extUrl}" target="_blank" rel="noopener" class="mlink secondary">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>Full Article
+      </a>
     </div>`;
+}
+
+// Called by tab buttons (global scope)
+function switchPlaceTab(key) {
+  _activeTab = key;
+  document.querySelectorAll('.pm-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === key));
+  _switchTab(key, null);
+}
+
+function _switchTab(key, p) {
+  const body = document.getElementById('pm-tab-body');
+  if (!body) return;
+  if (!_placeData) { body.innerHTML = `<div class="pm-loading"><i class="fa-solid fa-spinner fa-spin"></i></div>`; return; }
+
+  const d = _placeData;
+  switch (key) {
+    case 'overview':
+      body.innerHTML = `
+        <div class="pm-section">
+          <h3><i class="fa-solid fa-circle-info"></i> About This Place</h3>
+          <p>${d.overview || 'Overview information is being loaded…'}</p>
+          ${d.url ? `<a href="${d.url}" class="pm-readmore" target="_blank"><i class="fa-brands fa-wikipedia-w"></i> Read full Wikipedia article</a>` : ''}
+        </div>`;
+      break;
+    case 'history':
+      body.innerHTML = `
+        <div class="pm-section">
+          <h3><i class="fa-solid fa-scroll"></i> History</h3>
+          ${d.history
+            ? `<div class="pm-rich">${d.history}</div>`
+            : `<p class="pm-empty">Detailed history information is not available on Wikipedia for this place.<br>
+               ${d.url ? `<a href="${d.url}" target="_blank">Read the Wikipedia article →</a>` : ''}</p>`}
+        </div>`;
+      break;
+    case 'beliefs':
+      body.innerHTML = `
+        <div class="pm-section">
+          <h3><i class="fa-solid fa-hands-praying"></i> Culture & Beliefs</h3>
+          ${d.beliefs
+            ? `<div class="pm-rich">${d.beliefs}</div>`
+            : `<p class="pm-empty">Cultural and religious information is not available on Wikipedia for this place.<br>
+               ${d.url ? `<a href="${d.url}" target="_blank">Read the Wikipedia article →</a>` : ''}</p>`}
+        </div>`;
+      break;
+    case 'festivals':
+      body.innerHTML = `
+        <div class="pm-section">
+          <h3><i class="fa-solid fa-star-and-crescent"></i> Festivals & Events</h3>
+          ${d.festivals
+            ? `<div class="pm-rich">${d.festivals}</div>`
+            : `<p class="pm-empty">Festival information is not available on Wikipedia for this place.<br>
+               ${d.url ? `<a href="${d.url}" target="_blank">Read the Wikipedia article →</a>` : ''}</p>`}
+        </div>`;
+      break;
+    case 'visitor_info':
+      body.innerHTML = `
+        <div class="pm-section">
+          <h3><i class="fa-solid fa-map-location-dot"></i> Plan Your Visit</h3>
+          ${d.visitor_info
+            ? `<div class="pm-rich">${d.visitor_info}</div>`
+            : ''}
+          <div class="pm-visit-cards">
+            <div class="pm-vc"><i class="fa-solid fa-sun"></i><b>Best Season</b><span>Oct–Dec &amp; Mar–May</span></div>
+            <div class="pm-vc"><i class="fa-solid fa-clock"></i><b>Hours</b><span>${p?.opening_hours || 'Check locally'}</span></div>
+            <div class="pm-vc"><i class="fa-solid fa-coins"></i><b>Entry Fee</b><span>${p?.fee || 'Check locally'}</span></div>
+            <div class="pm-vc"><i class="fa-solid fa-phone"></i><b>Contact</b><span>${p?.phone || 'Check locally'}</span></div>
+          </div>
+        </div>`;
+      break;
+  }
+  body.scrollTop = 0;
 }
 
 async function fetchWikiData(name) {
   try {
-    const res = await fetch(`/api/place-detail/${encodeURIComponent(name)}`, { signal:AbortSignal.timeout(8000) });
+    const res = await fetch(`/api/place-detail/${encodeURIComponent(name)}`, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error();
     return await res.json();
-  } catch {
-    return { summary:null, extract2:null, img:null, url:null };
-  }
+  } catch { return { summary:null, extract2:null, img:null, url:null }; }
 }
 
-// ── CATEGORY FILTER ──────────────────────────────
-function filterByCategory(cat, el) {
-  activeCategory = cat;
-  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+// ── SIDEBAR CATEGORY DROPDOWN ─────────────────────
+const CAT_META = {
+  all:           { label:'All Places',     color:'#555',     icon:'fa-globe' },
+  heritage:      { label:'Heritage',       color:'#8B6340',  icon:'fa-landmark' },
+  spiritual:     { label:'Spiritual',      color:'#D4A017',  icon:'fa-place-of-worship' },
+  nature:        { label:'Nature',         color:'#3D7A5F',  icon:'fa-mountain-sun' },
+  trekking:      { label:'Trekking',       color:'#4A9B6F',  icon:'fa-person-hiking' },
+  viewpoint:     { label:'Viewpoints',     color:'#E8854A',  icon:'fa-binoculars' },
+  wildlife:      { label:'Wildlife',       color:'#2E7D32',  icon:'fa-paw' },
+  adventure:     { label:'Adventure',      color:'#C0392B',  icon:'fa-parachute-box' },
+  lakes:         { label:'Lakes & Rivers', color:'#1565C0',  icon:'fa-water' },
+  entertainment: { label:'Culture & Arts', color:'#6A1B9A',  icon:'fa-masks-theater' },
+};
+
+function toggleSbDd() {
+  const menu  = document.getElementById('sbCatMenu');
+  const arrow = document.getElementById('sbCatArrow');
+  const open  = menu.classList.toggle('open');
+  arrow.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+function pickSbCat(cat, el) {
+  // Update trigger button appearance
+  const meta = CAT_META[cat] || CAT_META.all;
+  document.getElementById('sbCatDot').style.background  = meta.color;
+  document.getElementById('sbCatLabel').textContent      = meta.label;
+
+  // Mark active option
+  document.querySelectorAll('.sb-cat-opt').forEach(o => o.classList.remove('active'));
   el.classList.add('active');
+
+  // Close dropdown
+  document.getElementById('sbCatMenu').classList.remove('open');
+  document.getElementById('sbCatArrow').style.transform = '';
+
+  // Filter
+  filterByCategory(cat);
+}
+
+// Close sidebar dropdown on outside click
+document.addEventListener('click', e => {
+  const dd = document.getElementById('sbCatDd');
+  if (dd && !dd.contains(e.target)) {
+    document.getElementById('sbCatMenu')?.classList.remove('open');
+    const a = document.getElementById('sbCatArrow');
+    if (a) a.style.transform = '';
+  }
+});
+
+function filterByCategory(cat) {
+  activeCategory = cat;
   clearRoute();
   if (!allPlaces.length) return;
-  const f = catFilter(allPlaces);
-  renderList(f); showMarkers(f);
-  setHead(`${f.length} Places`, cat==='all' ? `All types · ${radiusKm} km` : `${cap(cat)} · ${radiusKm} km`);
+  const f    = catFilter(allPlaces);
+  const meta = CAT_META[cat] || CAT_META.all;
+  renderList(f);
+  showMarkers(f);
+  setHead(
+    `${f.length} Places Found`,
+    cat === 'all' ? `All categories · ${radiusKm} km` : `${meta.label} · ${radiusKm} km`
+  );
 }
 
 // ── DESTINATION MODAL — data fetched from /api/destinations/:key ──────────

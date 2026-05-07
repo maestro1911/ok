@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Barlow+Condensed:wght@300;400;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="static/css/TO3.css"/>
+  <link rel="stylesheet" href="static/css/TO3F.css"/>
 </head>
 <body>
 
@@ -45,6 +45,8 @@
   <ul class="nav-links">
     <li><a href="#hero">Home</a></li>
     <li><a href="#nepal-tours">Nepal Tours</a></li>
+    <li><a href="#seasonal-guide">Best Time</a></li>
+    <li><a href="#travel-essentials">Travel Tips</a></li>
     <li><a href="#map-section">Live Map</a></li>
     <li><a href="#how">How It Works</a></li>
   </ul>
@@ -97,6 +99,8 @@
       <div class="fact"><span>3</span><p>UNESCO regions</p></div>
       <div class="fact-sep"></div>
       <div class="fact"><span>70+</span><p>trekking routes</p></div>
+      <div class="fact-sep"></div>
+      <div class="fact"><span>125+</span><p>ethnic groups</p></div>
     </div>
   </div>
   <div class="scroll-hint">
@@ -105,17 +109,6 @@
   </div>
 </section>
 
-<!-- ══ CATEGORY BAR ══ -->
-<div id="categories">
-  <div class="cats-wrap">
-    <div class="cat-item active" data-cat="all" onclick="filterByCategory('all',this)"><i class="fa-solid fa-globe"></i> All Places</div>
-    <div class="cat-item" data-cat="tourism" onclick="filterByCategory('tourism',this)"><i class="fa-solid fa-camera-retro"></i> Attractions</div>
-    <div class="cat-item" data-cat="natural" onclick="filterByCategory('natural',this)"><i class="fa-solid fa-mountain-sun"></i> Nature</div>
-    <div class="cat-item" data-cat="historic" onclick="filterByCategory('historic',this)"><i class="fa-solid fa-landmark"></i> Heritage</div>
-    <div class="cat-item" data-cat="leisure" onclick="filterByCategory('leisure',this)"><i class="fa-solid fa-leaf"></i> Parks</div>
-    <div class="cat-item" data-cat="viewpoint" onclick="filterByCategory('viewpoint',this)"><i class="fa-solid fa-binoculars"></i> Viewpoints</div>
-  </div>
-</div>
 
 <!-- ══ PHOTO STRIP ══ -->
 <div class="photo-strip">
@@ -271,6 +264,54 @@
       </div>
     </div>
 
+    <!-- KATHMANDU -->
+    <div class="tcard" onclick="openDestModal('kathmandu')">
+      <div class="tcard-img">
+        <img src="https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=700&q=80&auto=format&fit=crop"
+             alt="Kathmandu Valley"
+             onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80'"/>
+        <div class="tcard-img-overlay"></div>
+        <div class="tcard-badge">7 UNESCO Sites</div>
+        <div class="tcard-dist"><i class="fa-solid fa-route"></i> Nepal's Capital</div>
+      </div>
+      <div class="tcard-body">
+        <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Bagmati Province</div>
+        <h3>Kathmandu Valley</h3>
+        <p>Seven UNESCO sites in one valley — ancient Durbar Squares, Boudhanath Stupa, Pashupatinath Temple and the legendary Monkey Temple.</p>
+        <div class="tcard-tags">
+          <span>🏛 Durbar Squares</span><span>🕉 Boudhanath</span><span>🐒 Swayambhu</span>
+        </div>
+        <div class="tcard-foot">
+          <span><i class="fa-regular fa-clock"></i> 4–7 days</span>
+          <span class="tcard-more">Full Details <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVEREST BASE CAMP -->
+    <div class="tcard featured" onclick="openDestModal('everest')">
+      <div class="tcard-img">
+        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=700&q=80&auto=format&fit=crop"
+             alt="Everest Base Camp Trek"
+             onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=700&q=80'"/>
+        <div class="tcard-img-overlay"></div>
+        <div class="tcard-badge restricted">World's Highest</div>
+        <div class="tcard-dist"><i class="fa-solid fa-route"></i> Flight + 12–14 day trek</div>
+      </div>
+      <div class="tcard-body">
+        <div class="tcard-region"><i class="fa-solid fa-map-pin"></i> Koshi Province</div>
+        <h3>Everest Base Camp</h3>
+        <p>The world's ultimate trekking pilgrimage — 5,364 metres, Khumbu Glacier, Sherpa villages, Tengboche Monastery and Everest standing above it all.</p>
+        <div class="tcard-tags">
+          <span>🏔 8,849m Summit</span><span>🧊 Khumbu Glacier</span><span>🛕 Tengboche</span>
+        </div>
+        <div class="tcard-foot">
+          <span><i class="fa-regular fa-clock"></i> 16–21 days</span>
+          <span class="tcard-more">Full Details <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+      </div>
+    </div>
+
     <!-- BANDIPUR -->
     <div class="tcard" onclick="openDestModal('bandipur')">
       <div class="tcard-img">
@@ -311,6 +352,115 @@
   </div>
 </section>
 
+<!-- ══ SEASONAL GUIDE ══ -->
+<section id="seasonal-guide">
+  <div class="section-eyebrow">Plan Smart</div>
+  <h2 class="section-title">Best Time to Visit<br><em>Nepal</em></h2>
+  <p class="section-desc">Nepal has four distinct seasons — each offering a completely different experience. Choose the right time for your adventure.</p>
+  <div class="seasons-grid">
+    <div class="season-card peak">
+      <div class="season-icon">🍂</div>
+      <div class="season-label peak-label">Peak Season</div>
+      <h4>October – November</h4>
+      <p>The golden window. Crystal-clear skies after monsoon, ideal temperatures, and perfect mountain visibility. Best for trekking and Everest views. <strong>Book 3–6 months ahead.</strong></p>
+      <div class="season-tags">
+        <span>🏔 Trekking</span><span>🪂 Paragliding</span><span>📸 Photography</span>
+      </div>
+    </div>
+    <div class="season-card good">
+      <div class="season-icon">🌸</div>
+      <div class="season-label good-label">Excellent</div>
+      <h4>March – May</h4>
+      <p>Spring brings rhododendrons in full bloom coating the hillsides in red and pink. Warm and clear before the monsoon. Second best for trekking and wildlife.</p>
+      <div class="season-tags">
+        <span>🌺 Rhododendrons</span><span>🦅 Wildlife</span><span>🏕 Camping</span>
+      </div>
+    </div>
+    <div class="season-card winter">
+      <div class="season-icon">❄️</div>
+      <div class="season-label winter-label">Winter</div>
+      <h4>December – February</h4>
+      <p>Cold at altitude but surprisingly sunny. Fewer crowds, lower prices. Perfect for Chitwan and Lumbini. High passes may close, but Pokhara and Kathmandu are excellent.</p>
+      <div class="season-tags">
+        <span>🦏 Chitwan Safari</span><span>🕌 Lumbini</span><span>💸 Best Prices</span>
+      </div>
+    </div>
+    <div class="season-card monsoon">
+      <div class="season-icon">🌧️</div>
+      <div class="season-label monsoon-label">Monsoon</div>
+      <h4>June – September</h4>
+      <p>Heavy rains make trekking harder but the landscape is lush and magical. Festivals are in full swing. Mustang (rain-shadow) is actually brilliant in this season.</p>
+      <div class="season-tags">
+        <span>🏯 Mustang</span><span>🎭 Festivals</span><span>🌿 Lush Green</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TRAVEL ESSENTIALS ══ -->
+<section id="travel-essentials">
+  <div class="section-eyebrow">Before You Go</div>
+  <h2 class="section-title">Nepal Travel<br><em>Essentials</em></h2>
+  <div class="essentials-grid">
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-passport"></i></div>
+      <h4>Visa</h4>
+      <p>Most nationalities get a visa on arrival at Tribhuvan Airport. 15-day: $30 · 30-day: $50 · 90-day: $125. Bring passport photos and USD cash.</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+      <h4>Currency</h4>
+      <p>Nepalese Rupee (NPR). 1 USD ≈ 133 NPR. ATMs available in cities. Carry cash for remote areas. Daily budget: $20–$60 (budget–mid-range).</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+      <h4>Altitude Health</h4>
+      <p>Ascend slowly above 3,000m. Acclimatise 1–2 days before climbing higher. Stay hydrated. Diamox helps prevent AMS. Descend immediately if symptoms worsen.</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h4>Safety</h4>
+      <p>Nepal is generally very safe. Register your trek with TIMS card. Always trek with a licensed guide in remote areas. Travel insurance covering evacuation is essential.</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-plug"></i></div>
+      <h4>Electricity</h4>
+      <p>220V, 50Hz. Type C/D/M plugs. Power cuts (load shedding) happen outside cities. Bring a power bank. Solar charging available on major trekking routes.</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-wifi"></i></div>
+      <h4>Connectivity</h4>
+      <p>Ncell and NTC SIM cards (from $3) available at the airport. 4G in cities and main towns. WiFi in teahouses on popular routes. Satellite phones for remote expeditions.</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-syringe"></i></div>
+      <h4>Vaccinations</h4>
+      <p>Hepatitis A &amp; B, Typhoid recommended. Rabies and Japanese Encephalitis for rural areas. Malaria prophylaxis for Terai lowlands. Check with your doctor 6–8 weeks ahead.</p>
+    </div>
+    <div class="ess-card">
+      <div class="ess-icon"><i class="fa-solid fa-person-hiking"></i></div>
+      <h4>Trekking Permits</h4>
+      <p>TIMS card (~$20) + National Park entry fees required for all major routes. Annapurna: ~$30. Everest: ~$35. Upper Mustang: $500/10 days (special permit). Buy in Kathmandu.</p>
+    </div>
+  </div>
+
+  <!-- Emergency Contacts -->
+  <div class="emergency-box">
+    <div class="emergency-header">
+      <i class="fa-solid fa-phone-volume"></i>
+      <h4>Emergency Contacts in Nepal</h4>
+    </div>
+    <div class="emergency-grid">
+      <div class="em-item"><span class="em-num">100</span><span class="em-lbl">Police</span></div>
+      <div class="em-item"><span class="em-num">102</span><span class="em-lbl">Ambulance</span></div>
+      <div class="em-item"><span class="em-num">101</span><span class="em-lbl">Fire Brigade</span></div>
+      <div class="em-item"><span class="em-num">+977 1 4220744</span><span class="em-lbl">Tourist Police</span></div>
+      <div class="em-item"><span class="em-num">+977 1 4273402</span><span class="em-lbl">Mountain Rescue</span></div>
+      <div class="em-item"><span class="em-num">+977 1 4225709</span><span class="em-lbl">Himalayan Rescue</span></div>
+    </div>
+  </div>
+</section>
+
 <!-- ══ MAP SECTION ══ -->
 <section id="map-section">
   <div class="map-inner">
@@ -346,11 +496,38 @@
           <p id="result-sub">Press Locate Me to discover nearby places</p>
         </div>
         <div class="sidebar-legend">
-          <span class="leg-dot natural"></span>Nature
-          <span class="leg-dot tourism"></span>Attraction
-          <span class="leg-dot historic"></span>Heritage
-          <span class="leg-dot viewpoint"></span>Viewpoint
+          <span class="leg-dot heritage"></span>Heritage
+          <span class="leg-dot spiritual"></span>Spiritual
+          <span class="leg-dot nature"></span>Nature
+          <span class="leg-dot trekking"></span>Trekking
+          <span class="leg-dot wildlife"></span>Wildlife
+          <span class="leg-dot adventure"></span>Adventure
         </div>
+
+        <!-- ══ INLINE CATEGORY DROPDOWN ══ -->
+        <div class="sb-cat-bar">
+          <span class="sb-cat-label"><i class="fa-solid fa-layer-group"></i> Category</span>
+          <div class="sb-cat-dd" id="sbCatDd">
+            <button class="sb-cat-trigger" id="sbCatTrigger" onclick="toggleSbDd()">
+              <span class="sb-cat-dot" id="sbCatDot" style="background:#555"></span>
+              <span id="sbCatLabel">All Places</span>
+              <i class="fa-solid fa-chevron-down" id="sbCatArrow"></i>
+            </button>
+            <div class="sb-cat-menu" id="sbCatMenu">
+              <div class="sb-cat-opt active" data-cat="all"           onclick="pickSbCat('all',this)"><span class="sb-cat-opt-dot" style="background:#555"></span><i class="fa-solid fa-globe"></i> All Places</div>
+              <div class="sb-cat-opt" data-cat="heritage"             onclick="pickSbCat('heritage',this)"><span class="sb-cat-opt-dot" style="background:#8B6340"></span><i class="fa-solid fa-landmark"></i> Heritage</div>
+              <div class="sb-cat-opt" data-cat="spiritual"            onclick="pickSbCat('spiritual',this)"><span class="sb-cat-opt-dot" style="background:#D4A017"></span><i class="fa-solid fa-place-of-worship"></i> Spiritual</div>
+              <div class="sb-cat-opt" data-cat="nature"               onclick="pickSbCat('nature',this)"><span class="sb-cat-opt-dot" style="background:#3D7A5F"></span><i class="fa-solid fa-mountain-sun"></i> Nature</div>
+              <div class="sb-cat-opt" data-cat="trekking"             onclick="pickSbCat('trekking',this)"><span class="sb-cat-opt-dot" style="background:#4A9B6F"></span><i class="fa-solid fa-person-hiking"></i> Trekking</div>
+              <div class="sb-cat-opt" data-cat="viewpoint"            onclick="pickSbCat('viewpoint',this)"><span class="sb-cat-opt-dot" style="background:#E8854A"></span><i class="fa-solid fa-binoculars"></i> Viewpoints</div>
+              <div class="sb-cat-opt" data-cat="wildlife"             onclick="pickSbCat('wildlife',this)"><span class="sb-cat-opt-dot" style="background:#2E7D32"></span><i class="fa-solid fa-paw"></i> Wildlife</div>
+              <div class="sb-cat-opt" data-cat="adventure"            onclick="pickSbCat('adventure',this)"><span class="sb-cat-opt-dot" style="background:#C0392B"></span><i class="fa-solid fa-parachute-box"></i> Adventure</div>
+              <div class="sb-cat-opt" data-cat="lakes"                onclick="pickSbCat('lakes',this)"><span class="sb-cat-opt-dot" style="background:#1565C0"></span><i class="fa-solid fa-water"></i> Lakes &amp; Rivers</div>
+              <div class="sb-cat-opt" data-cat="entertainment"        onclick="pickSbCat('entertainment',this)"><span class="sb-cat-opt-dot" style="background:#6A1B9A"></span><i class="fa-solid fa-masks-theater"></i> Culture &amp; Arts</div>
+            </div>
+          </div>
+        </div>
+
         <div id="place-list">
           <div class="empty-state">
             <div class="empty-icon"><i class="fa-solid fa-compass"></i></div>
@@ -432,6 +609,6 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="static/js/TO3.js"></script>
+<script src="static/js/TO3F.js "></script>
 </body>
 </html>
