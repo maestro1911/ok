@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flood Risk Detection with Rasterio + NumPy</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070d14;
+  --surface: #0e1a26;
+  --surface2: #152232;
+  --surface3: #1c2f42;
+  --border: rgba(56,189,248,0.12);
+  --border2: rgba(56,189,248,0.25);
+  --text: #e2f0fa;
+  --text2: #7fb3d3;
+  --text3: #4a7a9b;
+  --accent: #22d3ee;
+  --accent2: #0ea5e9;
+  --gold: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f97316;
+  --purple: #a78bfa;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Space Grotesk', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+
+/* ---- LAYOUT ---- */
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:260px;min-width:260px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+.main{margin-left:260px;flex:1;padding:0;}
+.section{display:none;min-height:100vh;padding:56px 64px 80px;}
+.section.active{display:block;}
+
+/* ---- SIDEBAR ---- */
+.sidebar-header{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo{font-family:var(--display);font-size:15px;font-weight:800;color:var(--accent);letter-spacing:-0.3px;line-height:1.2;}
+.sidebar-sub{font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:0.5px;text-transform:uppercase;}
+.nav-list{padding:16px 12px;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:2px;transition:all 0.15s;border:1px solid transparent;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(34,211,238,0.1);color:var(--accent);border-color:rgba(34,211,238,0.2);}
+.nav-num{font-family:var(--mono);font-size:11px;color:var(--text3);min-width:20px;}
+.nav-item.active .nav-num{color:var(--accent);}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
+.progress-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.3s;}
+
+/* ---- TYPOGRAPHY ---- */
+.section-tag{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--accent);}
+h1{font-family:var(--display);font-size:52px;font-weight:800;line-height:1.05;color:var(--text);letter-spacing:-1.5px;margin-bottom:20px;}
+h1 span{color:var(--accent);}
+h2{font-family:var(--display);font-size:32px;font-weight:800;color:var(--text);letter-spacing:-0.8px;margin-bottom:16px;}
+h2 span{color:var(--accent);}
+h3{font-family:var(--sans);font-size:18px;font-weight:600;color:var(--text);margin-bottom:12px;}
+p{color:var(--text2);line-height:1.7;font-size:15px;margin-bottom:16px;}
+strong{color:var(--text);font-weight:600;}
+
+/* ---- COMPONENTS ---- */
+.lead{font-size:19px;color:var(--text);line-height:1.6;font-weight:300;margin-bottom:32px;}
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;}
+.card-accent{border-left:3px solid var(--accent);}
+.card-gold{border-left:3px solid var(--gold);}
+.card-green{border-left:3px solid var(--green);}
+.card-red{border-left:3px solid var(--red);}
+.card-purple{border-left:3px solid var(--purple);}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:4px;margin-right:4px;margin-bottom:4px;}
+.tag-blue{background:rgba(34,211,238,0.12);color:var(--accent);border:1px solid rgba(34,211,238,0.25);}
+.tag-gold{background:rgba(245,158,11,0.12);color:var(--gold);border:1px solid rgba(245,158,11,0.25);}
+.tag-green{background:rgba(16,185,129,0.12);color:var(--green);border:1px solid rgba(16,185,129,0.25);}
+.tag-red{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.25);}
+.divider{border:none;border-top:1px solid var(--border);margin:32px 0;}
+.inline-code{font-family:var(--mono);font-size:13px;background:var(--surface2);border:1px solid var(--border);padding:2px 6px;border-radius:4px;color:var(--accent);}
+.alert{padding:14px 18px;border-radius:8px;margin:16px 0;font-size:14px;display:flex;gap:12px;align-items:flex-start;}
+.alert-info{background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.25);color:#7dd3fc;}
+.alert-warn{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);color:#fcd34d;}
+.alert-success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#6ee7b7;}
+.alert-icon{font-size:16px;margin-top:1px;}
+.step-list{counter-reset:steps;}
+.step{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start;}
+.step-num{min-width:32px;height:32px;border-radius:50%;background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0;}
+.step-content h4{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.step-content p{margin:0;font-size:14px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+.nav-btns{display:flex;gap:12px;margin-top:40px;padding-top:32px;border-top:1px solid var(--border);}
+.btn{padding:10px 20px;border-radius:8px;font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all 0.15s;}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);}
+.btn-primary{background:var(--accent);color:var(--bg);font-weight:600;}
+.btn-primary:hover{background:#38e8ff;}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;}
+.stat{background:var(--surface2);border-radius:8px;padding:16px;text-align:center;}
+.stat-val{font-family:var(--display);font-size:28px;font-weight:800;color:var(--accent);}
+.stat-lbl{font-size:12px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px;}
+
+/* ---- CODE BLOCKS ---- */
+.code-wrap{margin:16px 0;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.code-header{background:var(--surface3);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.code-lang{font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+.code-dots{display:flex;gap:6px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dot-red{background:#ff5f57;}
+.dot-yellow{background:#febc2e;}
+.dot-green{background:#28c840;}
+.code-body{background:#060e17;padding:20px 24px;overflow-x:auto;}
+pre{font-family:var(--mono);font-size:13.5px;line-height:1.75;color:#cdd6f4;}
+.kw{color:#cba6f7;}
+.fn{color:#89b4fa;}
+.str{color:#a6e3a1;}
+.num{color:#fab387;}
+.cmt{color:#6c7086;font-style:italic;}
+.cls{color:#89dceb;}
+.op{color:#94e2d5;}
+.var{color:#cdd6f4;}
+.dec{color:#f38ba8;}
+.imp{color:#89b4fa;}
+
+/* ---- FLOOD DEMO ---- */
+.demo-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:24px 0;}
+.demo-header{background:var(--surface3);padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.demo-title{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600;}
+.demo-body{padding:24px;}
+.canvas-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+.canvas-panel{text-align:center;}
+.canvas-lbl{font-family:var(--mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+canvas{border-radius:8px;border:1px solid var(--border);display:block;width:100%;height:auto;}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:20px;background:var(--surface2);padding:20px;border-radius:8px;}
+.ctrl-group label{font-size:13px;color:var(--text2);display:flex;justify-content:space-between;margin-bottom:6px;}
+.ctrl-group label span{color:var(--accent);font-family:var(--mono);font-weight:600;}
+input[type=range]{width:100%;accent-color:var(--accent);}
+.risk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;}
+.rs{background:var(--surface2);border-radius:8px;padding:12px 16px;text-align:center;}
+.rs-val{font-family:var(--mono);font-size:22px;font-weight:600;}
+.rs-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;justify-content:center;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);}
+.leg-swatch{width:14px;height:14px;border-radius:3px;}
+
+/* ---- PIPELINE DIAGRAM ---- */
+.pipeline{display:flex;align-items:center;gap:0;margin:24px 0;overflow-x:auto;padding:4px 0;}
+.pipe-step{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;text-align:center;min-width:130px;flex-shrink:0;}
+.pipe-step h4{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.pipe-step p{font-size:11px;color:var(--text3);margin:0;}
+.pipe-arrow{color:var(--accent);font-size:20px;margin:0 6px;flex-shrink:0;}
+.pipe-step.highlight{background:rgba(34,211,238,0.1);border-color:rgba(34,211,238,0.4);}
+
+/* ---- HOME HERO ---- */
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:100px;padding:6px 14px;font-size:12px;color:var(--accent);font-family:var(--mono);margin-bottom:32px;}
+.hero-badge::before{content:'●';font-size:8px;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.module-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;}
+.pill{padding:6px 14px;border-radius:100px;font-size:13px;font-weight:500;}
+.pill-blue{background:rgba(14,165,233,0.15);color:#38bdf8;border:1px solid rgba(14,165,233,0.3);}
+.pill-amber{background:rgba(245,158,11,0.15);color:var(--gold);border:1px solid rgba(245,158,11,0.3);}
+.outline-list{list-style:none;padding:0;}
+.outline-list li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2);}
+.outline-list li::before{content:'→';color:var(--accent);font-family:var(--mono);}
+.outline-list li strong{color:var(--text);}
+
+/* ---- APPLICATION CARDS ---- */
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
+.app-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.app-icon{font-size:28px;margin-bottom:10px;}
+.app-card h4{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.app-card p{font-size:13px;color:var(--text3);margin:0;line-height:1.5;}
+
+/* ---- CONCEPT TABLE ---- */
+table{width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;}
+th{background:var(--surface3);color:var(--text);font-weight:600;padding:10px 14px;text-align:left;font-size:13px;border-bottom:1px solid var(--border2);}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);}
+td:first-child{color:var(--text);font-family:var(--mono);font-size:12px;}
+tr:last-child td{border:none;}
+
+/* ---- FORMULA BOX ---- */
+.formula{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;font-family:var(--mono);font-size:14px;color:var(--accent);text-align:center;margin:16px 0;letter-spacing:0.5px;}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .main{margin-left:0;}
+  .section{padding:32px 24px;}
+  .grid-2,.grid-3,.two-col,.canvas-row{grid-template-columns:1fr;}
+  h1{font-size:34px;}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Rasterio + NumPy</div>
+    <div class="sidebar-sub">Spatial Python — 1hr lecture</div>
+  </div>
+  <nav class="nav-list">
+    <div class="nav-item active" onclick="goto(0)"><span class="nav-num">00</span> Introduction</div>
+    <div class="nav-item" onclick="goto(1)"><span class="nav-num">01</span> What is Rasterio?</div>
+    <div class="nav-item" onclick="goto(2)"><span class="nav-num">02</span> Installation</div>
+    <div class="nav-item" onclick="goto(3)"><span class="nav-num">03</span> Raster Fundamentals</div>
+    <div class="nav-item" onclick="goto(4)"><span class="nav-num">04</span> Rasterio Core API</div>
+    <div class="nav-item" onclick="goto(5)"><span class="nav-num">05</span> NumPy Integration</div>
+    <div class="nav-item" onclick="goto(6)"><span class="nav-num">06</span> The Problem: Flood Risk</div>
+    <div class="nav-item" onclick="goto(7)"><span class="nav-num">07</span> Full Code Walkthrough</div>
+    <div class="nav-item" onclick="goto(8)"><span class="nav-num">08</span> Live Demo</div>
+    <div class="nav-item" onclick="goto(9)"><span class="nav-num">09</span> Applications &amp; Summary</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div>Progress</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:5%"></div></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- SECTION 0: HOME -->
+<section class="section active" id="s0">
+  <div class="hero-badge">◉ Flood Risk Detection using DEM — Spatial Python Lecture</div>
+  <h1>Mapping <span>Flood Risk</span><br>from Elevation Data</h1>
+  <p class="lead">A complete hands-on lecture: from installing rasterio on your laptop to detecting real-world flood-prone areas using Digital Elevation Models and NumPy array math.</p>
+  <div class="module-pills">
+    <span class="pill pill-blue">rasterio 1.3+</span>
+    <span class="pill pill-blue">numpy 1.24+</span>
+    <span class="pill pill-amber">GeoTIFF / DEM</span>
+    <span class="pill pill-amber">GDAL backend</span>
+    <span class="pill pill-blue">Python 3.8+</span>
+  </div>
+  <div class="two-col">
+    <div>
+      <h3>What we'll cover today</h3>
+      <ul class="outline-list">
+        <li><strong>What rasterio is</strong> and why it exists</li>
+        <li><strong>Installation</strong> — pip, conda &amp; platform quirks</li>
+        <li><strong>Raster fundamentals</strong> — bands, CRS, transforms</li>
+        <li><strong>Core API</strong> — open, read, write, reproject</li>
+        <li><strong>NumPy integration</strong> — array math on spatial data</li>
+        <li><strong>Real problem</strong> — Flood Risk Detection using DEM</li>
+        <li><strong>Live interactive demo</strong> — see it in action</li>
+      </ul>
+    </div>
+    <div>
+      <div class="card card-accent">
+        <div class="section-tag" style="margin-bottom:14px;">The Real World Problem</div>
+        <h3 style="color:var(--accent);margin-bottom:8px;">Flood Risk Area Detection</h3>
+        <p>Using a Digital Elevation Model (DEM) raster of the Kathmandu Valley, we'll build a Python script that automatically identifies areas most at risk of flooding — using only rasterio and numpy.</p>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="tag tag-blue">DEM Analysis</span>
+          <span class="tag tag-gold">Slope Calculation</span>
+          <span class="tag tag-red">Risk Mapping</span>
+          <span class="tag tag-green">Raster Output</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-primary" onclick="goto(1)">Start Lecture →</button>
+  </div>
+</section>
+
+<!-- SECTION 1: WHAT IS RASTERIO -->
+<section class="section" id="s1">
+  <div class="section-tag">Module 01</div>
+  <h2>What is <span>Rasterio</span>?</h2>
+  <p class="lead">Rasterio is Python's primary library for reading and writing geospatial raster data. It wraps GDAL — the Geospatial Data Abstraction Library — behind a clean, Pythonic API.</p>
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3>The Ecosystem</h3>
+        <div style="display:flex;align-items:center;gap:0;margin:16px 0;flex-wrap:wrap;">
+          <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;text-align:center;min-width:80px;">
+            <div style="font-size:11px;color:var(--text3);">Your Python</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-top:4px;">Script</div>
+          </div>
+          <div style="color:var(--accent);padding:0 6px;font-size:18px;">→</div>
+          <div style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.4);border-radius:8px;padding:10px 14px;text-align:center;min-width:80px;">
+            <div style="font-size:11px;color:var(--text3);">Library</div>
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-top:4px;">rasterio</div>
+          </div>
+          <div style="color:var(--accent);padding:0 6px;font-size:18px;">→</div>
+          <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;text-align:center;min-width:80px;">
+            <div style="font-size:11px;color:var(--text3);">C++ Engine</div>
+            <div style="font-size:13px;font-weight:600;color:var(--gold);margin-top:4px;">GDAL</div>
+          </div>
+          <div style="color:var(--accent);padding:0 6px;font-size:18px;">→</div>
+          <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;text-align:center;min-width:80px;">
+            <div style="font-size:11px;color:var(--text3);">File</div>
+            <div style="font-size:13px;font-weight:600;color:var(--green);margin-top:4px;">GeoTIFF</div>
+          </div>
+        </div>
+        <p style="margin:0;font-size:14px;">Rasterio exposes GDAL's power through Python, turning complex C++ calls into simple <span class="inline-code">with rasterio.open()</span> statements.</p>
+      </div>
+      <div class="card card-gold">
+        <h3>Supported File Formats</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
+          <span class="tag tag-gold">GeoTIFF (.tif)</span>
+          <span class="tag tag-gold">NetCDF (.nc)</span>
+          <span class="tag tag-gold">HDF5 (.h5)</span>
+          <span class="tag tag-gold">ASCII Grid (.asc)</span>
+          <span class="tag tag-gold">IMG (.img)</span>
+          <span class="tag tag-gold">JPEG2000</span>
+          <span class="tag tag-gold">VRT</span>
+          <span class="tag tag-gold">100+ more...</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Why not just use plain GDAL?</h3>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Pythonic API</h4>
+          <p>Context managers, clean exceptions, no manual memory management. Write <span class="inline-code">src.read(1)</span> not <span class="inline-code">GetRasterBand(1).ReadAsArray()</span>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>NumPy Native</h4>
+          <p>Data is returned directly as NumPy arrays — ready for any scientific computation, machine learning, or visualization pipeline.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Windowed Reading</h4>
+          <p>Read only a spatial window of a huge file. Process satellite imagery larger than your RAM by streaming in tiles.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h4>Modern Ecosystem</h4>
+          <p>Works natively with shapely, geopandas, xarray, and matplotlib for a complete spatial analysis stack.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div>Rasterio was created by Sean Gillies at Mapbox in 2013 and is now maintained by the open-source community. It is the geospatial raster library of choice for Python developers worldwide.</div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(0)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(2)">Installation →</button>
+  </div>
+</section>
+
+<!-- SECTION 2: INSTALLATION -->
+<section class="section" id="s2">
+  <div class="section-tag">Module 02</div>
+  <h2><span>Installing</span> Rasterio</h2>
+  <p class="lead">Rasterio depends on GDAL — a C++ library. This makes installation slightly more complex than a typical Python package, but manageable.</p>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>GDAL dependency:</strong> Rasterio compiles against GDAL. On Windows especially, you must install GDAL correctly first or use conda which handles this automatically.</div>
+  </div>
+
+  <h3 style="margin-top:24px;">Method 1 — Conda (Recommended for everyone)</h3>
+  <p>Conda manages binary dependencies. This is the easiest, most reliable method on any platform:</p>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">terminal</div></div>
+    <div class="code-body"><pre><span class="cmt"># Create a clean environment (highly recommended)</span>
+conda create -n geoenv python=3.11 -y
+conda activate geoenv
+
+<span class="cmt"># Install via conda-forge — handles GDAL automatically</span>
+conda install -c conda-forge rasterio numpy matplotlib -y
+
+<span class="cmt"># Verify installation</span>
+python -c <span class="str">"import rasterio; print('rasterio', rasterio.__version__)"</span>
+python -c <span class="str">"import numpy; print('numpy', numpy.__version__)"</span></pre></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Method 2 — pip (Linux/Mac with GDAL already installed)</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">terminal — linux/mac</div></div>
+    <div class="code-body"><pre><span class="cmt"># Ubuntu/Debian — install GDAL system library first</span>
+sudo apt-get install gdal-bin libgdal-dev python3-dev
+
+<span class="cmt"># Mac via Homebrew</span>
+brew install gdal
+
+<span class="cmt"># Then pip install</span>
+pip install rasterio numpy</pre></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Method 3 — Windows (pre-compiled wheels)</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">terminal — windows</div></div>
+    <div class="code-body"><pre><span class="cmt"># Step 1: Download GDAL wheel from https://github.com/cgohlke/geospatial-wheels</span>
+<span class="cmt"># Match your Python version (cp311 = Python 3.11, win_amd64 = 64-bit Windows)</span>
+pip install GDAL-3.8.4-cp311-cp311-win_amd64.whl
+
+<span class="cmt"># Step 2: Download and install rasterio wheel</span>
+pip install rasterio-1.3.9-cp311-cp311-win_amd64.whl
+
+<span class="cmt"># OR use conda-forge (avoids all the above)</span>
+conda install -c conda-forge rasterio numpy</pre></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Verify Your Installation</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">python</div></div>
+    <div class="code-body"><pre><span class="kw">import</span> <span class="imp">rasterio</span>
+<span class="kw">import</span> <span class="imp">numpy</span> <span class="kw">as</span> <span class="imp">np</span>
+
+<span class="fn">print</span>(<span class="str">f"rasterio version: </span><span class="num">{rasterio.__version__}</span><span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"numpy version:    </span><span class="num">{np.__version__}</span><span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"GDAL version:     </span><span class="num">{rasterio.gdal_version()}</span><span class="str">"</span>)
+<span class="fn">print</span>(<span class="str">f"Supported drivers: </span><span class="num">{len(rasterio.drivers.raster_driver_extensions())}</span><span class="str"> formats"</span>)
+
+<span class="cmt"># Expected output:</span>
+<span class="cmt"># rasterio version: 1.3.9</span>
+<span class="cmt"># numpy version:    1.26.4</span>
+<span class="cmt"># GDAL version:     3.8.4</span>
+<span class="cmt"># Supported drivers: 150 formats</span></pre></div>
+  </div>
+
+  <div class="grid grid-3" style="margin-top:20px;">
+    <div class="card card-green">
+      <h3 style="color:var(--green);">✓ conda-forge</h3>
+      <p style="font-size:13px;">Easiest. Handles all binary deps. Recommended for beginners and Windows users.</p>
+    </div>
+    <div class="card card-gold">
+      <h3 style="color:var(--gold);">~ pip</h3>
+      <p style="font-size:13px;">Works well on Linux/Mac if GDAL is already installed via system package manager.</p>
+    </div>
+    <div class="card card-red">
+      <h3 style="color:var(--red);">⚡ Windows pip</h3>
+      <p style="font-size:13px;">Manual wheel installation. Error-prone if versions mismatch. Use conda instead.</p>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(1)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(3)">Raster Fundamentals →</button>
+  </div>
+</section>
+
+<!-- SECTION 3: RASTER FUNDAMENTALS -->
+<section class="section" id="s3">
+  <div class="section-tag">Module 03</div>
+  <h2>Raster <span>Fundamentals</span></h2>
+  <p class="lead">Before we write code, we need to understand what a raster file actually is and what data it holds.</p>
+  <div class="two-col">
+    <div>
+      <div class="card card-accent" style="margin-bottom:16px;">
+        <h3>What is a Raster?</h3>
+        <p>A raster is a <strong>grid of pixels</strong>, each containing a value. Like a photograph, but each pixel stores geographic data instead of color.</p>
+        <div style="margin:16px 0;display:grid;grid-template-columns:repeat(6,1fr);gap:2px;max-width:200px;">
+          <div style="background:#1a4a3a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">120</div>
+          <div style="background:#1a4a3a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">135</div>
+          <div style="background:#2a6a4a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">89</div>
+          <div style="background:#4a7a2a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#a7f3d0;">67</div>
+          <div style="background:#3a6a2a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">92</div>
+          <div style="background:#1a4a3a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">110</div>
+          <div style="background:#2a5a4a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">88</div>
+          <div style="background:#5a8a1a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#a7f3d0;">45</div>
+          <div style="background:rgba(14,165,233,0.6);border-radius:2px;border:1px solid var(--accent);aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#fff;">23</div>
+          <div style="background:#5a8a1a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#a7f3d0;">51</div>
+          <div style="background:#3a6a3a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">78</div>
+          <div style="background:#1a4a2a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;color:#6ee7b7;">115</div>
+        </div>
+        <p style="font-size:13px;margin:0;">↑ Each cell = one pixel = one elevation value (in metres for a DEM)</p>
+      </div>
+      <div class="card">
+        <h3>Key Raster Properties</h3>
+        <table>
+          <tr><th>Property</th><th>What it means</th></tr>
+          <tr><td>width / height</td><td>Number of columns / rows of pixels</td></tr>
+          <tr><td>count</td><td>Number of bands (layers)</td></tr>
+          <tr><td>dtype</td><td>Data type: float32, uint16, int16…</td></tr>
+          <tr><td>nodata</td><td>Sentinel value for missing pixels</td></tr>
+          <tr><td>crs</td><td>Coordinate Reference System (projection)</td></tr>
+          <tr><td>transform</td><td>Maps pixel → geographic coords</td></tr>
+          <tr><td>bounds</td><td>Geographic extent (min/max lat/lon)</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card card-gold" style="margin-bottom:16px;">
+        <h3>What is a DEM?</h3>
+        <p>A <strong>Digital Elevation Model</strong> is a raster where each pixel stores the <strong>elevation above sea level</strong> for that geographic location.</p>
+        <div style="margin:12px 0;padding:12px;background:var(--surface3);border-radius:6px;">
+          <div style="font-family:var(--mono);font-size:12px;color:var(--text2);">
+            <div>Pixel at (row=50, col=80)</div>
+            <div style="color:var(--gold);margin-top:4px;">Value = <strong>1,337 metres</strong> above sea level</div>
+            <div style="color:var(--text3);margin-top:4px;">Located at: 27.68°N, 85.32°E</div>
+          </div>
+        </div>
+        <p style="margin:0;font-size:13px;">DEM sources: SRTM (NASA), ASTER GDEM, Copernicus DEM, ALOS DEM</p>
+      </div>
+      <div class="card card-purple" style="margin-bottom:16px;">
+        <h3>The Affine Transform</h3>
+        <p>The transform tells rasterio how pixel coordinates map to real-world coordinates:</p>
+        <div class="formula">transform = [pixel_width, 0, top_left_lon,<br>0, -pixel_height, top_left_lat]</div>
+        <p style="margin:0;font-size:13px;">Pixel at (row r, col c) → <br>lon = top_left_lon + c × pixel_width<br>lat = top_left_lat - r × pixel_height</p>
+      </div>
+      <div class="card">
+        <h3>Coordinate Reference System (CRS)</h3>
+        <p>Defines what coordinate system the data uses. Two common ones for Nepal:</p>
+        <div style="font-family:var(--mono);font-size:12px;display:grid;gap:8px;margin-top:8px;">
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;"><span style="color:var(--accent);">EPSG:4326</span> <span style="color:var(--text3);">— WGS84 (degrees lat/lon)</span></div>
+          <div style="background:var(--surface2);padding:10px;border-radius:6px;"><span style="color:var(--gold);">EPSG:32645</span> <span style="color:var(--text3);">— UTM Zone 45N (metres)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(2)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(4)">Core API →</button>
+  </div>
+</section>
+
+<!-- SECTION 4: CORE API -->
+<section class="section" id="s4">
+  <div class="section-tag">Module 04</div>
+  <h2>Rasterio <span>Core API</span></h2>
+  <p class="lead">The entire rasterio workflow revolves around context managers and NumPy arrays. Here are the essential patterns you'll use every time.</p>
+
+  <h3>Opening &amp; Inspecting a Raster</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">python — open &amp; inspect</div></div>
+    <div class="code-body"><pre><span class="kw">import</span> <span class="imp">rasterio</span>
+<span class="kw">import</span> <span class="imp">numpy</span> <span class="kw">as</span> <span class="imp">np</span>
+
+<span class="cmt"># Always use context manager — handles file closing automatically</span>
+<span class="kw">with</span> <span class="fn">rasterio.open</span>(<span class="str">'kathmandu_dem.tif'</span>) <span class="kw">as</span> src:
+
+    <span class="cmt"># --- Metadata ---</span>
+    <span class="fn">print</span>(src.meta)           <span class="cmt"># Complete metadata dict</span>
+    <span class="fn">print</span>(src.crs)            <span class="cmt"># CRS object: EPSG:4326</span>
+    <span class="fn">print</span>(src.transform)      <span class="cmt"># Affine transform matrix</span>
+    <span class="fn">print</span>(src.bounds)         <span class="cmt"># BoundingBox(left, bottom, right, top)</span>
+    <span class="fn">print</span>(src.width, src.height)   <span class="cmt"># 1200, 900 (pixels)</span>
+    <span class="fn">print</span>(src.count)          <span class="cmt"># Number of bands: 1 for DEM</span>
+    <span class="fn">print</span>(src.dtypes)         <span class="cmt"># ('float32',)</span>
+    <span class="fn">print</span>(src.nodata)         <span class="cmt"># -9999.0 (no-data sentinel value)</span>
+
+    <span class="cmt"># --- Read data as NumPy array ---</span>
+    dem = src.<span class="fn">read</span>(<span class="num">1</span>)        <span class="cmt"># Band 1 → shape: (900, 1200)</span>
+    all_bands = src.<span class="fn">read</span>()   <span class="cmt"># All bands → shape: (count, h, w)</span>
+
+    <span class="cmt"># --- Save the profile for writing output ---</span>
+    profile = src.profile.copy()
+
+<span class="fn">print</span>(dem.shape, dem.dtype)   <span class="cmt"># (900, 1200) float32</span></pre></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Writing a Raster Output</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">python — write output</div></div>
+    <div class="code-body"><pre><span class="cmt"># Modify the profile for your output</span>
+profile.update(
+    dtype=<span class="str">'uint8'</span>,      <span class="cmt"># 0-255 instead of float</span>
+    count=<span class="num">1</span>,             <span class="cmt"># Single band output</span>
+    nodata=<span class="num">255</span>           <span class="cmt"># New nodata value</span>
+)
+
+<span class="cmt"># Write the flood risk array to a new GeoTIFF</span>
+<span class="kw">with</span> <span class="fn">rasterio.open</span>(<span class="str">'flood_risk.tif'</span>, <span class="str">'w'</span>, **profile) <span class="kw">as</span> dst:
+    dst.<span class="fn">write</span>(flood_risk_array, <span class="num">1</span>)  <span class="cmt"># Write band 1</span>
+
+<span class="fn">print</span>(<span class="str">"✅ Saved flood_risk.tif — open in QGIS!"</span>)</pre></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Reprojection (Bonus)</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">python — reproject to UTM</div></div>
+    <div class="code-body"><pre><span class="kw">from</span> <span class="imp">rasterio.warp</span> <span class="kw">import</span> calculate_default_transform, reproject, Resampling
+<span class="kw">from</span> <span class="imp">rasterio.crs</span> <span class="kw">import</span> CRS
+
+dst_crs = <span class="fn">CRS.from_epsg</span>(<span class="num">32645</span>)  <span class="cmt"># UTM Zone 45N — metres, perfect for Nepal</span>
+
+<span class="kw">with</span> <span class="fn">rasterio.open</span>(<span class="str">'dem_wgs84.tif'</span>) <span class="kw">as</span> src:
+    transform, width, height = <span class="fn">calculate_default_transform</span>(
+        src.crs, dst_crs, src.width, src.height, *src.bounds
+    )
+    profile = src.profile.copy()
+    profile.update(crs=dst_crs, transform=transform, width=width, height=height)
+
+    <span class="kw">with</span> <span class="fn">rasterio.open</span>(<span class="str">'dem_utm.tif'</span>, <span class="str">'w'</span>, **profile) <span class="kw">as</span> dst:
+        <span class="fn">reproject</span>(source=<span class="fn">rasterio.band</span>(src, <span class="num">1</span>),
+                   destination=<span class="fn">rasterio.band</span>(dst, <span class="num">1</span>),
+                   resampling=Resampling.bilinear)</pre></div>
+  </div>
+
+  <div class="alert alert-success">
+    <span class="alert-icon">✅</span>
+    <div><strong>Key rule:</strong> Always use <span class="inline-code">with rasterio.open()</span> context managers. They automatically close file handles, flush write buffers, and prevent memory leaks — even if your code crashes mid-execution.</div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(3)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(5)">NumPy Integration →</button>
+  </div>
+</section>
+
+<!-- SECTION 5: NUMPY INTEGRATION -->
+<section class="section" id="s5">
+  <div class="section-tag">Module 05</div>
+  <h2>NumPy <span>Integration</span></h2>
+  <p class="lead">Rasterio reads your raster into a NumPy array. This means the entire NumPy arsenal — masking, broadcasting, vectorized math — is at your disposal.</p>
+
+  <h3>Essential NumPy Operations for Raster Analysis</h3>
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">python — numpy spatial operations</div></div>
+    <div class="code-body"><pre><span class="kw">import</span> <span class="imp">numpy</span> <span class="kw">as</span> <span class="imp">np</span>
+<span class="kw">import</span> <span class="imp">rasterio</span>
+
+<span class="kw">with</span> <span class="fn">rasterio.open</span>(<span class="str">'kathmandu_dem.tif'</span>) <span class="kw">as</span> src:
+    dem = src.<span class="fn">read</span>(<span class="num">1</span>).astype(float)  <span class="cmt"># Convert to float for NaN support</span>
+    nodata = src.nodata
+
+<span class="cmt"># ── 1. Handle NoData values ──────────────────────────────────────────</span>
+dem[dem == nodata] = np.nan           <span class="cmt"># Replace sentinel with NaN</span>
+dem_masked = np.ma.<span class="fn">masked_invalid</span>(dem) <span class="cmt"># Or use masked array</span>
+
+<span class="cmt"># ── 2. Basic Statistics ──────────────────────────────────────────────</span>
+<span class="fn">print</span>(<span class="str">f"Min elevation: </span><span class="num">{np.nanmin(dem):.1f}</span><span class="str"> m"</span>)
+<span class="fn">print</span>(<span class="str">f"Max elevation: </span><span class="num">{np.nanmax(dem):.1f}</span><span class="str"> m"</span>)
+<span class="fn">print</span>(<span class="str">f"Mean elevation: </span><span class="num">{np.nanmean(dem):.1f}</span><span class="str"> m"</span>)
+<span class="fn">print</span>(<span class="str">f"Std deviation: </span><span class="num">{np.nanstd(dem):.1f}</span><span class="str"> m"</span>)
+
+<span class="cmt"># ── 3. Boolean Masking (vectorized, no loops!) ───────────────────────</span>
+low_areas    = dem &lt; <span class="num">1350</span>             <span class="cmt"># True/False array, same shape as dem</span>
+valley_floor = (dem &gt;= <span class="num">1300</span>) &amp; (dem &lt; <span class="num">1380</span>)
+high_areas   = dem &gt; <span class="num">2000</span>
+
+<span class="cmt"># Area calculation (assuming 30m pixel resolution)</span>
+pixel_area_m2 = <span class="num">30</span> * <span class="num">30</span>
+low_area_km2 = low_areas.<span class="fn">sum</span>() * pixel_area_m2 / <span class="num">1e6</span>
+<span class="fn">print</span>(<span class="str">f"Low elevation area: </span><span class="num">{low_area_km2:.1f}</span><span class="str"> km²"</span>)
+
+<span class="cmt"># ── 4. Slope Calculation with np.gradient ────────────────────────────</span>
+pixel_size = <span class="num">30</span>                        <span class="cmt"># 30 metres per pixel (UTM projected)</span>
+dy, dx = np.<span class="fn">gradient</span>(dem, pixel_size, pixel_size)
+slope_rad = np.<span class="fn">arctan</span>(np.<span class="fn">sqrt</span>(dx**<span class="num">2</span> + dy**<span class="num">2</span>))
+slope_deg = np.<span class="fn">degrees</span>(slope_rad)
+
+<span class="cmt"># ── 5. Reclassification ──────────────────────────────────────────────</span>
+risk_class = np.<span class="fn">where</span>(dem &lt; <span class="num">1300</span>, <span class="num">3</span>,          <span class="cmt"># 3 = High risk</span>
+             np.<span class="fn">where</span>(dem &lt; <span class="num">1380</span>, <span class="num">2</span>,          <span class="cmt"># 2 = Medium risk</span>
+             np.<span class="fn">where</span>(dem &lt; <span class="num">1500</span>, <span class="num">1</span>, <span class="num">0</span>)))      <span class="cmt"># 1 = Low risk, 0 = Safe</span>
+
+<span class="cmt"># ── 6. Combine conditions (AND / OR) ─────────────────────────────────</span>
+flat_low = (slope_deg &lt; <span class="num">3</span>) &amp; (dem &lt; <span class="num">1380</span>)   <span class="cmt"># Flat AND low</span>
+steep_high = (slope_deg &gt; <span class="num">30</span>) | (dem &gt; <span class="num">2500</span>) <span class="cmt"># Steep OR very high</span></pre></div>
+  </div>
+
+  <div class="grid grid-3" style="margin-top:20px;">
+    <div class="card">
+      <h3 style="color:var(--accent);font-size:15px;">np.gradient()</h3>
+      <p style="font-size:13px;margin:0;">Computes central differences across the array. For a 2D DEM: returns (dy, dx) — the rate of elevation change in each direction.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--gold);font-size:15px;">Boolean Masking</h3>
+      <p style="font-size:13px;margin:0;">Conditions like <span class="inline-code">dem &lt; 1350</span> return a True/False array. No loops needed — NumPy operates on the entire grid at once.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--green);font-size:15px;">np.where()</h3>
+      <p style="font-size:13px;margin:0;">Element-wise conditional: where condition is True use value A, else use value B. Perfect for reclassification.</p>
+    </div>
+  </div>
+  <div class="alert alert-info" style="margin-top:16px;">
+    <span class="alert-icon">🚀</span>
+    <div><strong>Performance:</strong> NumPy operations on a 1200×900 DEM (1M pixels) take <strong>milliseconds</strong>. The equivalent Python for-loop would take <strong>minutes</strong>. Always use vectorized operations.</div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(4)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(6)">The Problem →</button>
+  </div>
+</section>
+
+<!-- SECTION 6: THE PROBLEM -->
+<section class="section" id="s6">
+  <div class="section-tag">Module 06 — Real World Problem</div>
+  <h2>Flood Risk Area <span>Detection</span></h2>
+  <p class="lead">Kathmandu Valley is a bowl-shaped depression surrounded by mountains. Low-lying areas near rivers flood regularly during monsoon. Our goal: automatically map these risk zones from a DEM.</p>
+
+  <div class="two-col">
+    <div>
+      <div class="card card-accent" style="margin-bottom:16px;">
+        <h3>Problem Statement</h3>
+        <p>Given a 30-metre resolution SRTM DEM of Kathmandu Valley, identify pixels that are at high flood risk based on:</p>
+        <div class="step" style="margin-bottom:12px;margin-top:16px;">
+          <div class="step-num" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);color:var(--red);">1</div>
+          <div class="step-content"><h4>Low elevation</h4><p>Areas below valley floor threshold (~1,350m) accumulate water</p></div>
+        </div>
+        <div class="step" style="margin-bottom:12px;">
+          <div class="step-num" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:var(--gold);">2</div>
+          <div class="step-content"><h4>Flat terrain</h4><p>Low slope angles (&lt;3°) prevent water from draining quickly</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.4);color:var(--purple);">3</div>
+          <div class="step-content"><h4>River proximity</h4><p>Pixels adjacent to drainage channels are highest risk</p></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <h3>The Algorithm Pipeline</h3>
+        <div class="step" style="margin-bottom:10px;margin-top:16px;">
+          <div class="step-num">1</div>
+          <div class="step-content"><h4>Load DEM</h4><p>Open GeoTIFF, read band 1 as NumPy float array</p></div>
+        </div>
+        <div class="step" style="margin-bottom:10px;">
+          <div class="step-num">2</div>
+          <div class="step-content"><h4>Clean NoData</h4><p>Mask -9999 sentinel values with NaN</p></div>
+        </div>
+        <div class="step" style="margin-bottom:10px;">
+          <div class="step-num">3</div>
+          <div class="step-content"><h4>Compute Slope</h4><p>np.gradient() → arctan → degrees</p></div>
+        </div>
+        <div class="step" style="margin-bottom:10px;">
+          <div class="step-num">4</div>
+          <div class="step-content"><h4>Apply Thresholds</h4><p>Boolean masks for elevation &amp; slope</p></div>
+        </div>
+        <div class="step" style="margin-bottom:10px;">
+          <div class="step-num">5</div>
+          <div class="step-content"><h4>Combine Masks</h4><p>Logical AND to find flat + low pixels</p></div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-content"><h4>Write Output</h4><p>Save risk raster as GeoTIFF with original CRS</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="stat-val">30m</div><div class="stat-lbl">SRTM Resolution</div></div>
+    <div class="stat"><div class="stat-val">1,337m</div><div class="stat-lbl">Valley Floor Avg</div></div>
+    <div class="stat"><div class="stat-val">&lt;3°</div><div class="stat-lbl">Flood Risk Slope</div></div>
+    <div class="stat"><div class="stat-val">~2ms</div><div class="stat-lbl">Processing Time</div></div>
+  </div>
+
+  <div class="formula">
+    Slope = arctan(√(dz/dx)² + (dz/dy)²) × (180/π)
+  </div>
+  <p style="text-align:center;font-size:13px;color:var(--text3);">Where dz/dx and dz/dy are the east-west and north-south elevation change rates computed by np.gradient()</p>
+
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(5)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(7)">Full Code →</button>
+  </div>
+</section>
+
+<!-- SECTION 7: FULL CODE -->
+<section class="section" id="s7">
+  <div class="section-tag">Module 07 — Complete Solution</div>
+  <h2>Full Code <span>Walkthrough</span></h2>
+  <p class="lead">Here is the complete, production-ready flood risk detection script — line by line with explanations.</p>
+
+  <div class="code-wrap">
+    <div class="code-header"><div class="code-dots"><div class="dot dot-red"></div><div class="dot dot-yellow"></div><div class="dot dot-green"></div></div><div class="code-lang">python — flood_risk_detection.py (complete)</div></div>
+    <div class="code-body"><pre><span class="cmt">"""
+Flood Risk Area Detection using DEM
+====================================
+Uses rasterio + numpy to identify flood-prone areas
+from a Digital Elevation Model (GeoTIFF).
+
+Input:  dem.tif  — SRTM or any DEM (float32, EPSG:4326 or UTM)
+Output: flood_risk.tif  — uint8 raster (1=flood risk, 0=safe)
+"""</span>
+
+<span class="kw">import</span> <span class="imp">rasterio</span>
+<span class="kw">import</span> <span class="imp">numpy</span> <span class="kw">as</span> <span class="imp">np</span>
+<span class="kw">import</span> <span class="imp">matplotlib.pyplot</span> <span class="kw">as</span> <span class="imp">plt</span>
+<span class="kw">from</span> <span class="imp">rasterio.plot</span> <span class="kw">import</span> show
+<span class="kw">import</span> <span class="imp">sys</span>
+
+
+<span class="kw">def</span> <span class="fn">detect_flood_risk</span>(
+    dem_path: str,
+    output_path: str,
+    elevation_threshold: float = <span class="num">1380.0</span>,   <span class="cmt"># metres — Kathmandu valley floor</span>
+    slope_threshold: float = <span class="num">3.0</span>,           <span class="cmt"># degrees — very flat terrain</span>
+    pixel_size_m: float = <span class="num">30.0</span>,             <span class="cmt"># SRTM pixel = ~30 metres</span>
+    verbose: bool = <span class="kw">True</span>
+) -> np.ndarray:
+    <span class="str">"""
+    Detect flood-risk areas from a DEM raster.
+
+    Returns:
+        flood_risk (ndarray): Binary uint8 array, 1 = at risk, 0 = safe
+    """</span>
+
+    <span class="cmt"># ── STEP 1: Load DEM ─────────────────────────────────────────────────</span>
+    <span class="kw">with</span> <span class="fn">rasterio.open</span>(dem_path) <span class="kw">as</span> src:
+        <span class="kw">if</span> verbose:
+            <span class="fn">print</span>(<span class="str">f"📂 Opened: {dem_path}"</span>)
+            <span class="fn">print</span>(<span class="str">f"   Size:      {src.width} × {src.height} pixels"</span>)
+            <span class="fn">print</span>(<span class="str">f"   CRS:       {src.crs}"</span>)
+            <span class="fn">print</span>(<span class="str">f"   Bounds:    {src.bounds}"</span>)
+            <span class="fn">print</span>(<span class="str">f"   NoData:    {src.nodata}"</span>)
+
+        <span class="cmt"># Read band 1 as float64 (needed for NaN support)</span>
+        dem = src.<span class="fn">read</span>(<span class="num">1</span>).astype(np.float64)
+        profile = src.profile.<span class="fn">copy</span>()
+        nodata_val = src.nodata
+        transform = src.transform
+
+    <span class="cmt"># ── STEP 2: Handle NoData ─────────────────────────────────────────────</span>
+    <span class="kw">if</span> nodata_val <span class="kw">is not None</span>:
+        dem[dem == nodata_val] = np.nan
+
+    valid_pixels = np.<span class="fn">sum</span>(~np.<span class="fn">isnan</span>(dem))
+    <span class="kw">if</span> verbose:
+        <span class="fn">print</span>(<span class="str">f"\n📊 Elevation Statistics:"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Valid pixels:  {valid_pixels:,}"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Min elevation: {np.nanmin(dem):.1f} m"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Max elevation: {np.nanmax(dem):.1f} m"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Mean elevation: {np.nanmean(dem):.1f} m"</span>)
+
+    <span class="cmt"># ── STEP 3: Compute Slope ─────────────────────────────────────────────</span>
+    <span class="cmt"># np.gradient returns (dy, dx) — N-S and E-W rate of change (m/m)</span>
+    dy, dx = np.<span class="fn">gradient</span>(dem, pixel_size_m, pixel_size_m)
+
+    <span class="cmt"># Slope angle in degrees: arctan of the gradient magnitude</span>
+    slope_rad = np.<span class="fn">arctan</span>(np.<span class="fn">sqrt</span>(dx**<span class="num">2</span> + dy**<span class="num">2</span>))
+    slope_deg = np.<span class="fn">degrees</span>(slope_rad)
+
+    <span class="kw">if</span> verbose:
+        <span class="fn">print</span>(<span class="str">f"\n📐 Slope Statistics:"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Min slope: {np.nanmin(slope_deg):.2f}°"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Max slope: {np.nanmax(slope_deg):.2f}°"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Mean slope: {np.nanmean(slope_deg):.2f}°"</span>)
+
+    <span class="cmt"># ── STEP 4: Apply Flood Risk Criteria ────────────────────────────────</span>
+    <span class="cmt"># Criterion A: Low elevation (below valley threshold)</span>
+    low_elevation = dem &lt; elevation_threshold
+
+    <span class="cmt"># Criterion B: Flat terrain (water won't drain away)</span>
+    flat_terrain = slope_deg &lt; slope_threshold
+
+    <span class="cmt"># Criterion C: Combination — flat AND low</span>
+    flood_risk_mask = (low_elevation &amp; flat_terrain)
+
+    <span class="cmt"># Also flag very low areas regardless of slope (river channels)</span>
+    very_low = dem &lt; (elevation_threshold * <span class="num">0.97</span>)  <span class="cmt"># 3% below threshold</span>
+    flood_risk_mask = flood_risk_mask | very_low
+
+    <span class="cmt"># Convert boolean to uint8 (0/1)</span>
+    flood_risk = flood_risk_mask.astype(np.uint8)
+    flood_risk[np.<span class="fn">isnan</span>(dem)] = <span class="num">0</span>   <span class="cmt"># NoData pixels → 0 (not risk)</span>
+
+    <span class="kw">if</span> verbose:
+        risk_count = flood_risk.<span class="fn">sum</span>()
+        risk_pct = risk_count / valid_pixels * <span class="num">100</span>
+        risk_km2 = risk_count * (pixel_size_m**<span class="num">2</span>) / <span class="num">1e6</span>
+        <span class="fn">print</span>(<span class="str">f"\n🌊 Flood Risk Results:"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Risk pixels: {risk_count:,} ({risk_pct:.1f}% of area)"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Risk area:   {risk_km2:.2f} km²"</span>)
+
+    <span class="cmt"># ── STEP 5: Write Output GeoTIFF ──────────────────────────────────────</span>
+    profile.<span class="fn">update</span>(
+        dtype=rasterio.uint8,
+        count=<span class="num">1</span>,
+        nodata=<span class="num">255</span>
+    )
+
+    <span class="kw">with</span> <span class="fn">rasterio.open</span>(output_path, <span class="str">'w'</span>, **profile) <span class="kw">as</span> dst:
+        dst.<span class="fn">write</span>(flood_risk, <span class="num">1</span>)
+
+    <span class="fn">print</span>(<span class="str">f"\n✅ Saved: {output_path}"</span>)
+    <span class="fn">print</span>(<span class="str">f"   → Open in QGIS to visualize over satellite imagery!"</span>)
+
+    <span class="kw">return</span> flood_risk, dem, slope_deg
+
+
+<span class="kw">def</span> <span class="fn">visualize_results</span>(dem, slope_deg, flood_risk):
+    <span class="str">"""Create a 3-panel visualization of the analysis."""</span>
+    fig, axes = plt.<span class="fn">subplots</span>(<span class="num">1</span>, <span class="num">3</span>, figsize=(<span class="num">15</span>, <span class="num">5</span>))
+    fig.<span class="fn">patch.set_facecolor</span>(<span class="str">'#070d14'</span>)
+
+    <span class="cmt"># Panel 1: DEM (elevation)</span>
+    im1 = axes[<span class="num">0</span>].<span class="fn">imshow</span>(dem, cmap=<span class="str">'terrain'</span>)
+    axes[<span class="num">0</span>].<span class="fn">set_title</span>(<span class="str">'Digital Elevation Model'</span>, color=<span class="str">'white'</span>)
+    plt.<span class="fn">colorbar</span>(im1, ax=axes[<span class="num">0</span>], label=<span class="str">'Elevation (m)'</span>)
+
+    <span class="cmt"># Panel 2: Slope</span>
+    im2 = axes[<span class="num">1</span>].<span class="fn">imshow</span>(slope_deg, cmap=<span class="str">'hot'</span>, vmax=<span class="num">45</span>)
+    axes[<span class="num">1</span>].<span class="fn">set_title</span>(<span class="str">'Slope (degrees)'</span>, color=<span class="str">'white'</span>)
+    plt.<span class="fn">colorbar</span>(im2, ax=axes[<span class="num">1</span>], label=<span class="str">'Slope (°)'</span>)
+
+    <span class="cmt"># Panel 3: Flood Risk</span>
+    im3 = axes[<span class="num">2</span>].<span class="fn">imshow</span>(flood_risk, cmap=<span class="str">'RdYlGn_r'</span>, vmin=<span class="num">0</span>, vmax=<span class="num">1</span>)
+    axes[<span class="num">2</span>].<span class="fn">set_title</span>(<span class="str">'Flood Risk Zones'</span>, color=<span class="str">'white'</span>)
+
+    <span class="kw">for</span> ax <span class="kw">in</span> axes:
+        ax.<span class="fn">set_facecolor</span>(<span class="str">'#0e1a26'</span>)
+
+    plt.<span class="fn">tight_layout</span>()
+    plt.<span class="fn">savefig</span>(<span class="str">'flood_risk_analysis.png'</span>, dpi=<span class="num">150</span>, bbox_inches=<span class="str">'tight'</span>)
+    plt.<span class="fn">show</span>()
+
+
+<span class="cmt"># ── ENTRY POINT ───────────────────────────────────────────────────────</span>
+<span class="kw">if</span> __name__ == <span class="str">'__main__'</span>:
+    risk, dem, slope = <span class="fn">detect_flood_risk</span>(
+        dem_path=<span class="str">'kathmandu_dem.tif'</span>,
+        output_path=<span class="str">'kathmandu_flood_risk.tif'</span>,
+        elevation_threshold=<span class="num">1380.0</span>,
+        slope_threshold=<span class="num">3.0</span>,
+    )
+    <span class="fn">visualize_results</span>(dem, slope, risk)</pre></div>
+  </div>
+
+  <div class="alert alert-success" style="margin-top:16px;">
+    <span class="alert-icon">🎓</span>
+    <div><strong>Getting a real DEM:</strong> Download free SRTM 30m DEM tiles from <strong>USGS EarthExplorer</strong> (earthexplorer.usgs.gov) or <strong>OpenTopography</strong> (opentopography.org). Search for "Kathmandu" and download the GeoTIFF. No account needed on OpenTopography.</div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(6)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(8)">Live Demo →</button>
+  </div>
+</section>
+
+<!-- SECTION 8: LIVE DEMO -->
+<section class="section" id="s8">
+  <div class="section-tag">Module 08 — Interactive Demo</div>
+  <h2>Live Flood Risk <span>Visualizer</span></h2>
+  <p class="lead">This interactive demo runs the flood detection algorithm in real-time on a synthetic Kathmandu-like valley DEM. Adjust parameters and watch the risk zones update instantly.</p>
+
+  <div class="demo-wrap">
+    <div class="demo-header">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+      <span class="demo-title">FloodRisk.py — Live Simulation</span>
+    </div>
+    <div class="demo-body">
+      <div class="canvas-row">
+        <div class="canvas-panel">
+          <div class="canvas-lbl">Digital Elevation Model (DEM)</div>
+          <canvas id="demCanvas" width="240" height="240"></canvas>
+        </div>
+        <div class="canvas-panel">
+          <div class="canvas-lbl">Slope Map (degrees)</div>
+          <canvas id="slopeCanvas" width="240" height="240"></canvas>
+        </div>
+        <div class="canvas-panel">
+          <div class="canvas-lbl">Flood Risk Zones</div>
+          <canvas id="riskCanvas" width="240" height="240"></canvas>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl-group">
+          <label>Elevation threshold <span id="elevLabel">1380 m</span></label>
+          <input type="range" id="elevSlider" min="1250" max="1500" value="1380" oninput="updateDemo()">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Pixels below this elevation are flagged as potentially flooded</div>
+        </div>
+        <div class="ctrl-group">
+          <label>Slope threshold <span id="slopeLabel">3.0°</span></label>
+          <input type="range" id="slopeSlider" min="1" max="15" value="3" step="0.5" oninput="updateDemo()">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Areas flatter than this angle are considered high-accumulation zones</div>
+        </div>
+        <div class="ctrl-group">
+          <label>Terrain type <span id="terrainLabel">Valley</span></label>
+          <input type="range" id="terrainSlider" min="0" max="2" value="0" step="1" oninput="updateDemo()">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">0=Valley bowl, 1=River delta, 2=Coastal plain</div>
+        </div>
+        <div class="ctrl-group">
+          <label>DEM noise (terrain roughness) <span id="noiseLabel">0.3</span></label>
+          <input type="range" id="noiseSlider" min="0" max="1" value="0.3" step="0.05" oninput="updateDemo()">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">Simulates terrain complexity</div>
+        </div>
+      </div>
+
+      <div class="risk-stats">
+        <div class="rs"><div class="rs-val" id="statRisk" style="color:var(--red);">0%</div><div class="rs-lbl">Flood Risk Area</div></div>
+        <div class="rs"><div class="rs-val" id="statLow" style="color:var(--gold);">0%</div><div class="rs-lbl">Low Elevation</div></div>
+        <div class="rs"><div class="rs-val" id="statFlat" style="color:var(--accent);">0%</div><div class="rs-lbl">Flat Terrain</div></div>
+      </div>
+
+      <div class="legend">
+        <div class="leg-item"><div class="leg-swatch" style="background:#1e3a5f;"></div>High Elevation (safe)</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#2d6a2a;"></div>Mid Elevation (safe)</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#8ab84a;"></div>Low Elevation (watch)</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#ff4d4d;"></div>Flood Risk Zone</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#ff8800;"></div>Very High Risk</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div>This is a <strong>synthetic DEM</strong> generated with math functions to simulate a valley. The algorithm running on it is <strong>identical</strong> to what you'd run on a real SRTM GeoTIFF with rasterio — just without the file I/O wrapper.</div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(7)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(9)">Applications →</button>
+  </div>
+</section>
+
+<!-- SECTION 9: APPLICATIONS & SUMMARY -->
+<section class="section" id="s9">
+  <div class="section-tag">Module 09 — Wrap Up</div>
+  <h2>Applications &amp; <span>Summary</span></h2>
+  <p class="lead">Rasterio + NumPy form the backbone of geospatial data science. Here's what else you can build with this stack.</p>
+
+  <div class="app-grid">
+    <div class="app-card">
+      <div class="app-icon">🌿</div>
+      <h4>NDVI Vegetation Mapping</h4>
+      <p>Compute Normalized Difference Vegetation Index from Sentinel-2 satellite bands. Identify crop health, deforestation, and urban growth.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🔥</div>
+      <h4>Wildfire Risk Assessment</h4>
+      <p>Combine slope, aspect, vegetation, and wind rasters to produce fire danger maps. Used by forest departments worldwide.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🏔️</div>
+      <h4>Landslide Susceptibility</h4>
+      <p>Steep slopes + heavy rainfall + loose soil = landslide risk. Rasterio + numpy can layer all these inputs into a risk model.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">☀️</div>
+      <h4>Solar Panel Placement</h4>
+      <p>Calculate hillshade and solar radiation from DEM to find optimal locations for solar farms based on sun-facing slopes.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🌡️</div>
+      <h4>Urban Heat Island Mapping</h4>
+      <p>Analyze Land Surface Temperature (LST) rasters from Landsat to detect heat islands in urban areas for city planning.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🗺️</div>
+      <h4>Change Detection</h4>
+      <p>Subtract rasters from different dates to detect changes: glacier melt, urban expansion, crop cycle monitoring.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h3>The Full Geospatial Python Stack</h3>
+  <div class="grid grid-3" style="margin-top:16px;">
+    <div class="card card-accent">
+      <h3 style="color:var(--accent);font-size:15px;">rasterio</h3>
+      <p style="font-size:13px;margin:0;">Read/write raster files. Our hero today. GeoTIFF, satellite imagery, DEMs.</p>
+    </div>
+    <div class="card card-gold">
+      <h3 style="color:var(--gold);font-size:15px;">numpy</h3>
+      <p style="font-size:13px;margin:0;">Fast array math. Every spatial operation — slope, masking, reclassification.</p>
+    </div>
+    <div class="card card-green">
+      <h3 style="color:var(--green);font-size:15px;">geopandas</h3>
+      <p style="font-size:13px;margin:0;">Vector data (shapefiles, GeoJSON). Combine with rasterio for raster+vector analysis.</p>
+    </div>
+    <div class="card card-purple">
+      <h3 style="color:var(--purple);font-size:15px;">xarray</h3>
+      <p style="font-size:13px;margin:0;">Multi-dimensional arrays with labels. Ideal for time-series satellite data (NetCDF).</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:15px;">shapely</h3>
+      <p style="font-size:13px;margin:0;">Geometric operations. Clip rasters by vector boundaries, extract by polygon.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:15px;">matplotlib</h3>
+      <p style="font-size:13px;margin:0;">Visualize rasters. rasterio.plot.show() wraps it for direct raster display.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <h3>Key Takeaways</h3>
+  <div class="grid grid-2" style="margin-top:8px;">
+    <div class="card card-accent">
+      <div style="font-size:13px;color:var(--text2);">
+        <p>✅ Rasterio = Python wrapper over GDAL. Use context managers always.</p>
+        <p>✅ <span class="inline-code">src.read(1)</span> returns a NumPy array — all numpy operations apply.</p>
+        <p style="margin:0;">✅ The <span class="inline-code">profile</span> preserves CRS + transform for writing outputs.</p>
+      </div>
+    </div>
+    <div class="card card-gold">
+      <div style="font-size:13px;color:var(--text2);">
+        <p>🌊 Flood risk = low elevation AND flat slope (np.gradient).</p>
+        <p>⚡ Boolean masking is vectorized — always faster than loops.</p>
+        <p style="margin:0;">🗺️ Any output GeoTIFF can be opened in QGIS for visualization.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-success" style="margin-top:16px;">
+    <span class="alert-icon">🚀</span>
+    <div><strong>Your challenge:</strong> Download a free SRTM DEM of your region from <strong>opentopography.org</strong>, run the flood_risk_detection.py script, and open the output in QGIS. Can you find real flood-prone areas that match known flood events in your area?</div>
+  </div>
+  <div class="nav-btns">
+    <button class="btn btn-ghost" onclick="goto(8)">← Back</button>
+    <button class="btn btn-primary" onclick="goto(0)">↑ Back to Start</button>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+/* ---- NAVIGATION ---- */
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('.nav-item');
+let current = 0;
+
+function goto(n) {
+  sections[current].classList.remove('active');
+  navItems[current].classList.remove('active');
+  current = n;
+  sections[current].classList.add('active');
+  navItems[current].classList.add('active');
+  document.getElementById('progress').style.width = ((n+1)/10*100) + '%';
+  window.scrollTo(0,0);
+  if (n === 8) setTimeout(initDemo, 100);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < 9) goto(current+1);
+  if (e.key === 'ArrowLeft' && current > 0) goto(current-1);
+});
+
+/* ---- FLOOD DEMO ---- */
+const N = 80;
+let demGrid = [];
+
+function genDEM(terrainType, noise) {
+  const g = [];
+  const types = [
+    (x,y) => { const d=Math.sqrt((x-0.5)**2+(y-0.5)**2); return 1200+d*700+seeded(x,y,noise)*300; },
+    (x,y) => { return 1300-y*120+x*30+seeded(x,y,noise)*180; },
+    (x,y) => { return 1310+Math.sin(x*8)*40+Math.cos(y*6)*30+seeded(x,y,noise)*150; }
+  ];
+  const fn = types[Math.min(2,Math.max(0,Math.round(terrainType)))];
+  for(let r=0;r<N;r++) {
+    g[r]=[];
+    for(let c=0;c<N;c++) {
+      g[r][c]=fn(c/(N-1),r/(N-1));
+    }
+  }
+  return g;
+}
+
+function seeded(x, y, amp) {
+  return amp*(Math.sin(x*17.3+y*13.7)*0.5+Math.cos(x*8.1-y*22.4)*0.3+Math.sin(x*31+y*7)*0.2);
+}
+
+function calcSlope(dem) {
+  const s=[];
+  for(let r=0;r<N;r++) {
+    s[r]=[];
+    for(let c=0;c<N;c++) {
+      const r0=Math.max(0,r-1),r1=Math.min(N-1,r+1);
+      const c0=Math.max(0,c-1),c1=Math.min(N-1,c+1);
+      const dy=(dem[r1][c]-dem[r0][c])/(r1-r0);
+      const dx=(dem[r][c1]-dem[r][c0])/(c1-c0);
+      s[r][c]=Math.atan(Math.sqrt(dx*dx+dy*dy))*180/Math.PI;
+    }
+  }
+  return s;
+}
+
+function updateDemo() {
+  const elevThr = parseFloat(document.getElementById('elevSlider').value);
+  const slopeThr = parseFloat(document.getElementById('slopeSlider').value);
+  const terrain = parseFloat(document.getElementById('terrainSlider').value);
+  const noise = parseFloat(document.getElementById('noiseSlider').value);
+
+  document.getElementById('elevLabel').textContent = elevThr + ' m';
+  document.getElementById('slopeLabel').textContent = slopeThr.toFixed(1) + '°';
+  document.getElementById('noiseLabel').textContent = noise.toFixed(2);
+  const tNames = ['Valley','River Delta','Coastal Plain'];
+  document.getElementById('terrainLabel').textContent = tNames[Math.round(terrain)];
+
+  const dem = genDEM(terrain, noise);
+  const slope = calcSlope(dem);
+
+  let minE=Infinity,maxE=-Infinity;
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) { if(dem[r][c]<minE)minE=dem[r][c]; if(dem[r][c]>maxE)maxE=dem[r][c]; }
+
+  const demCanvas = document.getElementById('demCanvas');
+  const slopeCanvas = document.getElementById('slopeCanvas');
+  const riskCanvas = document.getElementById('riskCanvas');
+  const dCtx = demCanvas.getContext('2d');
+  const sCtx = slopeCanvas.getContext('2d');
+  const rCtx = riskCanvas.getContext('2d');
+
+  const pw = demCanvas.width / N;
+  const ph = demCanvas.height / N;
+
+  let lowCount=0, flatCount=0, riskCount=0;
+
+  for(let r=0;r<N;r++) {
+    for(let c=0;c<N;c++) {
+      const e = dem[r][c];
+      const s = slope[r][c];
+      const t = (e-minE)/(maxE-minE);
+      const x = c*pw, y = r*ph;
+
+      // DEM coloring — terrain
+      let dr,dg,db;
+      if(t<0.2){dr=30;dg=80;db=150;}
+      else if(t<0.4){dr=50;dg=130;db=80;}
+      else if(t<0.6){dr=100;dg=160;db=70;}
+      else if(t<0.8){dr=180;dg=150;db=100;}
+      else{dr=220;dg=220;db=210;}
+      dCtx.fillStyle=`rgb(${dr},${dg},${db})`;
+      dCtx.fillRect(x,y,pw+1,ph+1);
+
+      // Slope coloring — hot (black→red→yellow→white)
+      const st = Math.min(1, s/45);
+      let sr,sg,sb;
+      if(st<0.33){sr=Math.round(st*3*200);sg=0;sb=0;}
+      else if(st<0.66){sr=200;sg=Math.round((st-0.33)*3*200);sb=0;}
+      else{sr=200;sg=200;sb=Math.round((st-0.66)*3*255);}
+      sCtx.fillStyle=`rgb(${sr},${sg},${sb})`;
+      sCtx.fillRect(x,y,pw+1,ph+1);
+
+      // Flood risk
+      const isLow = e < elevThr;
+      const isFlat = s < slopeThr;
+      const isVeryLow = e < elevThr * 0.97;
+      const isRisk = (isLow && isFlat) || isVeryLow;
+
+      if(isLow) lowCount++;
+      if(isFlat) flatCount++;
+      if(isRisk) riskCount++;
+
+      if(isRisk && isVeryLow) rCtx.fillStyle='#ff6600';
+      else if(isRisk) rCtx.fillStyle='#ff3333';
+      else if(isLow) rCtx.fillStyle='#6aaa30';
+      else if(t>0.7) rCtx.fillStyle='#1e3a5f';
+      else rCtx.fillStyle='#1a4a2a';
+      rCtx.fillRect(x,y,pw+1,ph+1);
+    }
+  }
+
+  const total = N*N;
+  document.getElementById('statRisk').textContent = (riskCount/total*100).toFixed(1)+'%';
+  document.getElementById('statLow').textContent = (lowCount/total*100).toFixed(1)+'%';
+  document.getElementById('statFlat').textContent = (flatCount/total*100).toFixed(1)+'%';
+}
+
+function initDemo() { updateDemo(); }
+</script>
+</body>
+</html>

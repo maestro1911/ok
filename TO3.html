@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TO3 — Sugam | Geomatics Portfolio & WebGIS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="TO3.css"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo">TO3</span>
+  <div class="nav-links">
+    <a href="#profile">Profile</a>
+    <a href="#skills">Skills</a>
+    <a href="#history">History</a>
+    <a href="#webgis">WebGIS</a>
+  </div>
+  <span class="nav-coord mono">27.7172°N · 85.3240°E</span>
+</nav>
+
+<!-- ═══════════════════ PART A — HERO ═══════════════════ -->
+<section id="profile" class="hero">
+  <div class="hero-topo" aria-hidden="true">
+    <svg viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="rgba(34,211,238,0.09)" fill="none" stroke-width="1">
+        <ellipse cx="350" cy="350" rx="40"  ry="28"/>
+        <ellipse cx="350" cy="350" rx="95"  ry="66"/>
+        <ellipse cx="350" cy="350" rx="155" ry="110"/>
+        <ellipse cx="350" cy="350" rx="222" ry="158"/>
+        <ellipse cx="350" cy="350" rx="295" ry="210"/>
+        <ellipse cx="350" cy="350" rx="370" ry="264"/>
+      </g>
+      <g stroke="rgba(245,158,11,0.055)" fill="none" stroke-width="0.5" stroke-dasharray="5,10">
+        <line x1="175" y1="0" x2="175" y2="700"/><line x1="350" y1="0" x2="350" y2="700"/>
+        <line x1="525" y1="0" x2="525" y2="700"/><line x1="0" y1="175" x2="700" y2="175"/>
+        <line x1="0" y1="350" x2="700" y2="350"/><line x1="0" y1="525" x2="700" y2="525"/>
+      </g>
+      <circle cx="350" cy="350" r="4" fill="rgba(245,158,11,0.45)"/>
+      <circle cx="350" cy="350" r="9" fill="none" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="hero-label"><span class="label-bar"></span><span>Geomatics Engineer · Kathmandu University</span></div>
+    <h1 class="hero-name">Sugam<br/><em class="hero-surname">[Surname]</em></h1>
+    <p class="hero-tagline">Bachelor of Engineering in Geomatics Engineering — spatial analyst, cartographer, and web GIS developer. Trained at Sainik Awasiya Mahavidyalaya, Sallaghari, Bhaktapur.</p>
+    <div class="hero-contacts">
+      <a href="mailto:sugam@ku.edu.np" class="c-pill"><span class="cp-icon">✉</span>sugam@ku.edu.np</a>
+      <a href="https://github.com/sugam" class="c-pill" target="_blank" rel="noopener"><span class="cp-icon">⌥</span>github.com/sugam</a>
+      <span class="c-pill static"><span class="cp-icon">◎</span>Kathmandu, Nepal</span>
+      <span class="c-pill static"><span class="cp-icon">△</span>1,400 m ASL</span>
+    </div>
+    <div class="hero-strip">
+      <span class="mono">WGS 84</span><span class="mono">EPSG:4326</span>
+      <span class="mono">Bagmati Province · Nepal</span><span class="mono">BE Geomatics · 2022–Present</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SKILLS ═══════════════════ -->
+<section id="skills" class="section-wrap">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-num mono">01</span>
+      <h2 class="sec-title">Skills &amp; Competencies</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="sc-top"><span class="sc-glyph">◈</span><h3>GIS &amp; Remote Sensing</h3></div>
+        <ul class="sc-list"><li>QGIS (Advanced)</li><li>ArcGIS Pro</li><li>ERDAS Imagine</li><li>Google Earth Engine</li><li>GPS / DGPS Survey</li><li>Drone Photogrammetry</li></ul>
+      </div>
+      <div class="skill-card">
+        <div class="sc-top"><span class="sc-glyph">◉</span><h3>Web &amp; WebGIS</h3></div>
+        <ul class="sc-list"><li>HTML5 / CSS3</li><li>JavaScript (ES6+)</li><li>Leaflet.js</li><li>OpenLayers</li><li>GeoServer / MapServer</li><li>WMS / WFS / WCS</li></ul>
+      </div>
+      <div class="skill-card">
+        <div class="sc-top"><span class="sc-glyph">◆</span><h3>Programming</h3></div>
+        <ul class="sc-list"><li>Python (GeoPandas, Shapely)</li><li>MATLAB</li><li>R (Spatial Statistics)</li><li>Bash / Shell Scripting</li><li>LaTeX</li></ul>
+      </div>
+      <div class="skill-card">
+        <div class="sc-top"><span class="sc-glyph">▣</span><h3>Database</h3></div>
+        <ul class="sc-list"><li>PostgreSQL / PostGIS</li><li>MySQL</li><li>SpatiaLite</li><li>GeoJSON / Shapefile</li><li>Spatial SQL Queries</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ HISTORY ═══════════════════ -->
+<section id="history" class="section-wrap alt-bg">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-num mono">02</span>
+      <h2 class="sec-title">Academic &amp; Project History</h2>
+    </div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-badge edu">EDU</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">2022 — Present</span><span class="tl-org">Kathmandu University · Dhulikhel</span></div>
+          <h3 class="tl-title">BE Geomatics Engineering</h3>
+          <p class="tl-desc">Geodesy, Photogrammetry, Remote Sensing, GIS, Spatial Database Management, WebGIS. Key courses: Digital Cartography, Satellite Geodesy, Spatial Data Infrastructure.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-badge prj">PRJ</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">2025</span><span class="tl-org">Leaflet.js · GeoJSON · Choropleth · Geolocation API</span></div>
+          <h3 class="tl-title">Nepal Tourism Explorer WebGIS (TO3)</h3>
+          <p class="tl-desc">Interactive radius-based tourist destination finder with Choropleth district overlay, real-time info panels, category filtering, and geolocation. GeoJSON preprocessed via QGIS.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-badge prj">PRJ</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">2024</span><span class="tl-org">Remote Sensing · Google Earth Engine · QGIS</span></div>
+          <h3 class="tl-title">LULC Change Detection — Kathmandu Valley</h3>
+          <p class="tl-desc">Multi-temporal LULC analysis (2010–2024) using Landsat 8 OLI. Supervised Maximum Likelihood Classification. Accuracy: 87.4%, Kappa: 0.82.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-badge prj">PRJ</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">2024</span><span class="tl-org">DGPS · Total Station · AutoCAD Civil 3D</span></div>
+          <h3 class="tl-title">GPS Field Survey &amp; Topographic Mapping</h3>
+          <p class="tl-desc">DGPS survey and total-station traverse of KU campus. 1:1,000 scale topographic map with 0.5 m contour intervals.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-badge prj">PRJ</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">2023</span><span class="tl-org">PostgreSQL · PostGIS · QGIS DB Manager</span></div>
+          <h3 class="tl-title">Spatial Database Design — Urban Parcels</h3>
+          <p class="tl-desc">Relational spatial database for urban land parcels using PostgreSQL/PostGIS. Spatial SQL queries: ST_Intersection, ST_Buffer, ST_Area.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-badge edu">EDU</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">2020 — 2022</span><span class="tl-org">Sainik Awasiya Mahavidyalaya · Sallaghari, Bhaktapur</span></div>
+          <h3 class="tl-title">+2 Science (PCM) — Higher Secondary Certificate</h3>
+          <p class="tl-desc">NEB Higher Secondary Certificate in Science stream: Physics, Chemistry, Mathematics, Computer Science.</p>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-badge edu">EDU</div>
+        <div class="tl-body">
+          <div class="tl-meta"><span class="tl-year mono">— 2020</span><span class="tl-org">Sainik Awasiya Mahavidyalaya · Sallaghari, Bhaktapur</span></div>
+          <h3 class="tl-title">Secondary Education Examination (SEE)</h3>
+          <p class="tl-desc">NEB SEE from Sainik Awasiya Mahavidyalaya, Sallaghari, Bhaktapur.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ PART B — WEBGIS DASHBOARD (full-screen) ═══════════════════ -->
+<section id="webgis" class="webgis-section">
+
+  <!-- thin label bar -->
+  <div class="wg-topbar">
+    <span class="mono">Part B — Featured WebGIS Project</span>
+    <span class="wg-topbar-title">Nepal Tourism Explorer · Choropleth + Radius Search</span>
+    <span class="mono">TO3.js · Leaflet.js v1.9.4</span>
+  </div>
+
+  <div class="wg-layout">
+
+    <!-- ── LEFT CONTROL PANEL ── -->
+    <aside class="side-panel" id="side-panel">
+
+      <div class="sp-brand">
+        <div class="sp-brand-tag mono">TO3</div>
+        <h2 class="sp-brand-title">Nepal Tourism<br/>Explorer</h2>
+        <p class="sp-brand-sub">Interactive radius search · Choropleth WebGIS</p>
+      </div>
+
+      <!-- STEP 1 — Location -->
+      <div class="sp-block">
+        <div class="sp-step-num">01</div>
+        <h3 class="sp-block-title">Set Search Centre</h3>
+        <button class="sp-btn geolocate" id="btn-geolocate">⊕&nbsp; Use My Location</button>
+        <p class="sp-hint">— or click anywhere on the map —</p>
+        <div class="sp-loc-display" id="loc-display" style="display:none">
+          <span class="sp-loc-icon">◎</span>
+          <span id="loc-text" class="mono"></span>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Radius -->
+      <div class="sp-block">
+        <div class="sp-step-num">02</div>
+        <h3 class="sp-block-title">Search Radius &nbsp;<span class="sp-radius-live" id="radius-live">100 km</span></h3>
+        <input type="range" id="radius-range" min="10" max="500" value="100" step="10" class="sp-range"/>
+        <div class="sp-range-labels"><span>10 km</span><span>250 km</span><span>500 km</span></div>
+        <button class="sp-btn search" id="btn-search" disabled>◉&nbsp; Search Destinations</button>
+      </div>
+
+      <!-- STEP 3 — Results + Category filter -->
+      <div class="sp-block sp-results-block" id="sp-results-block" style="display:none">
+        <div class="sp-step-num">03</div>
+        <h3 class="sp-block-title">
+          <span id="result-total">0</span> Destinations Found
+        </h3>
+
+        <div class="sp-filter-wrap">
+          <label class="sp-filter-label">Filter by Category</label>
+          <div class="sp-select-box">
+            <select id="cat-select" class="sp-select">
+              <option value="all">✦ All Categories</option>
+              <option value="heritage">🏛&nbsp; Heritage</option>
+              <option value="religion">🛕&nbsp; Religion</option>
+              <option value="trekking">🥾&nbsp; Trekking</option>
+              <option value="wildlife">🦏&nbsp; Wildlife</option>
+              <option value="adventure">🪂&nbsp; Adventure</option>
+              <option value="viewpoint">🔭&nbsp; Viewpoint</option>
+              <option value="nature">🏞&nbsp; Nature</option>
+              <option value="cultural">🎭&nbsp; Cultural</option>
+            </select>
+            <span class="sp-select-arrow">▾</span>
+          </div>
+          <p class="sp-filter-count" id="filter-count"></p>
+        </div>
+
+        <div class="sp-dest-list" id="sp-dest-list"></div>
+      </div>
+
+      <!-- GeoJSON note -->
+      <div class="sp-note">
+        <span class="sp-note-label mono">GeoJSON Preprocessing</span>
+        District polygons simplified in QGIS — Douglas-Peucker ε&nbsp;=&nbsp;0.001° + Check Validity (GEOS). Destination points validated against OSM.
+      </div>
+
+    </aside>
+
+    <!-- ── MAP ── -->
+    <div id="map"></div>
+
+  </div><!-- .wg-layout -->
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="mono">TO3.html · TO3.css · TO3.js · TO3.geojson</span>
+    <span>Geomatics Engineering · Kathmandu University · 2025</span>
+    <span class="mono">27.7172° N, 85.3240° E · 1 400 m ASL</span>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="TO3.js"></script>
+</body>
+</html>
