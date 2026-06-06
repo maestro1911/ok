@@ -466,7 +466,8 @@ body::before {
   padding:.08rem .32rem; border-radius:2px; border:1px solid; opacity:.85;
 }
 .dest-dist  { font-size:.64rem; color:var(--tx-3); font-family:var(--ff-m); }
-.dest-rating { font-size:.63rem; color:var(--ochre); letter-spacing:.04em; }
+.dest-rating   { font-size:.63rem; color:var(--ochre); letter-spacing:.04em; }
+.dest-visitors { font-size:.64rem; font-weight:600; font-family:var(--ff-m); }
 
 /* Category colours */
 .cat-heritage  { color:var(--c-heritage);  border-color:var(--c-heritage); }
@@ -529,13 +530,8 @@ body::before {
 .info-placeholder { font-size:.73rem; color:#b8a888; font-style:italic; line-height:1.6; }
 
 /* Destination marker */
-.dest-icon-wrap {
-  width:13px; height:13px; border-radius:50%;
-  border:2px solid rgba(255,255,255,0.85);
-  cursor:pointer; transition:transform .14s;
-  box-shadow:0 1px 5px rgba(0,0,0,0.45);
-}
-.dest-icon-wrap:hover { transform:scale(1.45); }
+/* Leaflet circleMarker cursor */
+.leaflet-interactive { cursor:pointer; }
 
 /* Legend */
 .legend-panel {
