@@ -494,6 +494,7 @@ document.getElementById('btn-geolocate').addEventListener('click', function() {
     }
   );
 });
+//sugam
 
 /* Click on map to set centre */
 map.on('click', function(e) {
